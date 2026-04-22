@@ -1,4 +1,5 @@
-const DATA_PATH = "data/world_bank_lac_2015_2025_notice_level_merged.csv";
+const DATA_PATH =
+  "https://raw.githubusercontent.com/rubingwang/CapstoneWB/main/data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv";
 const PAGE_SIZE = 50;
 
 const state = {

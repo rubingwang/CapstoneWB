@@ -164,7 +164,9 @@ PY
 This repository includes a browser-based viewer in `docs/` so supervisors can inspect records online without downloading files.
 
 - Viewer entry: `docs/index.html`
-- Viewer dataset: `docs/data/world_bank_lac_2015_2025_notice_level_merged.csv`
+- Viewer dataset source: `data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv` (loaded via raw GitHub URL)
+
+Note: The project keeps a single source of truth under `data/world_bank_lac_2015_2025_yearly_notice_level` and does not duplicate the merged CSV under `docs/`.
 
 ### Enable on GitHub
 
