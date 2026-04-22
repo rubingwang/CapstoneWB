@@ -1,14 +1,17 @@
 const DATA_PATH =
   "https://raw.githubusercontent.com/rubingwang/CapstoneWB/main/data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv";
+const DATA_UPDATED_AT_UTC = "2026-04-22 12:01:28 UTC";
 const PAGE_SIZE = 50;
 
 const state = {
   rows: [],
   filteredRows: [],
   currentPage: 1,
+  columns: [],
 };
 
 const dom = {
+  dataUpdatedAt: document.getElementById("dataUpdatedAt"),
   yearFilter: document.getElementById("yearFilter"),
   countryFilter: document.getElementById("countryFilter"),
   noticeTypeFilter: document.getElementById("noticeTypeFilter"),
@@ -16,6 +19,7 @@ const dom = {
   searchInput: document.getElementById("searchInput"),
   resetBtn: document.getElementById("resetBtn"),
   statusText: document.getElementById("statusText"),
+  tableHeadRow: document.getElementById("tableHeadRow"),
   tableBody: document.getElementById("tableBody"),
   prevBtn: document.getElementById("prevBtn"),
   nextBtn: document.getElementById("nextBtn"),
@@ -43,18 +47,49 @@ function fillSelect(selectEl, values) {
 
 function matchesSearch(row, q) {
   if (!q) return true;
-  const hay = [
-    row.project_name,
-    row.project_id,
-    row.notice_no,
-    row.winning_firm_name,
-    row.procurement_method,
-    row.country,
-  ]
-    .map(normalize)
+  const hay = Object.values(row)
+    .map((v) => normalize(v))
     .join(" ")
     .toLowerCase();
   return hay.includes(q);
+}
+
+function titleForColumn(column) {
+  return column
+    .split("_")
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+function isUrlValue(value) {
+  const v = normalize(value).toLowerCase();
+  return v.startsWith("http://") || v.startsWith("https://");
+}
+
+function chooseColumns(rows) {
+  const available = rows.length ? Object.keys(rows[0]) : [];
+  const preferred = [
+    "year_awarded",
+    "date_awarded",
+    "country",
+    "winning_firm_country",
+    "notice_type",
+    "notice_no",
+    "project_id",
+    "project_name",
+  ];
+  const inPreferred = preferred.filter((c) => available.includes(c));
+  const others = available.filter((c) => !inPreferred.includes(c));
+  return [...inPreferred, ...others];
+}
+
+function renderHeader() {
+  dom.tableHeadRow.innerHTML = "";
+  for (const col of state.columns) {
+    const th = document.createElement("th");
+    th.textContent = titleForColumn(col);
+    dom.tableHeadRow.appendChild(th);
+  }
 }
 
 function applyFilters() {
@@ -83,7 +118,7 @@ function renderTable() {
   if (state.filteredRows.length === 0) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 13;
+    td.colSpan = Math.max(state.columns.length, 1);
     td.className = "empty";
     td.textContent = "No records match current filters.";
     tr.appendChild(td);
@@ -96,25 +131,11 @@ function renderTable() {
 
   for (const row of pageRows) {
     const tr = document.createElement("tr");
-    const cells = [
-      normalize(row.year_awarded),
-      normalize(row.date_awarded || row.awarded_date),
-      normalize(row.country),
-      normalize(row.notice_type),
-      normalize(row.notice_no),
-      normalize(row.project_id),
-      normalize(row.project_name),
-      normalize(row.winning_firm_name),
-      normalize(row.winning_firm_country),
-      normalize(row.contract_currency),
-      normalize(row.contract_amount),
-      normalize(row.procurement_method),
-      normalize(row.contract_url),
-    ];
 
-    cells.forEach((cell, i) => {
+    state.columns.forEach((col) => {
+      const cell = normalize(row[col]);
       const td = document.createElement("td");
-      if (i === 12 && cell) {
+      if (cell && isUrlValue(cell)) {
         const a = document.createElement("a");
         a.href = cell;
         a.target = "_blank";
@@ -144,6 +165,7 @@ function renderStatus() {
 }
 
 function render() {
+  renderHeader();
   renderTable();
   renderStatus();
 }
@@ -188,6 +210,7 @@ function loadData() {
     complete: (res) => {
       state.rows = res.data;
       state.filteredRows = [...state.rows];
+      state.columns = chooseColumns(state.rows);
 
       fillSelect(dom.yearFilter, optionValues(state.rows, "year_awarded"));
       fillSelect(dom.countryFilter, optionValues(state.rows, "country"));
@@ -203,4 +226,5 @@ function loadData() {
   });
 }
 
+dom.dataUpdatedAt.textContent = `Data updated at (UTC): ${DATA_UPDATED_AT_UTC}`;
 loadData();
