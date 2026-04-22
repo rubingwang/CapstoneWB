@@ -1,6 +1,6 @@
 const DATA_PATH =
   "https://raw.githubusercontent.com/rubingwang/CapstoneWB/main/data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv";
-const DATA_UPDATED_AT_UTC = "2026-04-22 12:01:28 UTC";
+const DATA_UPDATED_AT_MADRID = "2026-04-22 14:23:05 CEST";
 const PAGE_SIZE = 50;
 
 const state = {
@@ -226,5 +226,5 @@ function loadData() {
   });
 }
 
-dom.dataUpdatedAt.textContent = `Data updated at (UTC): ${DATA_UPDATED_AT_UTC}`;
+dom.dataUpdatedAt.textContent = `Data updated at (Madrid time): ${DATA_UPDATED_AT_MADRID}`;
 loadData();

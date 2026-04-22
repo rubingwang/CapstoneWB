@@ -1,9 +1,9 @@
 {
-  "data_updated_at_utc": "2026-04-22 12:01:28 UTC",
   "rows": 38767,
   "years": [
     2015,
     2025
   ],
-  "remaining_non_wb_winning_country_values": 0
+  "remaining_non_wb_winning_country_values": 0,
+  "data_updated_at_madrid": "2026-04-22 14:23:05 CEST"
 }
