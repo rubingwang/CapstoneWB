@@ -158,3 +158,26 @@ PY
 - Folder: `data/world_bank_lac_2015_2025_yearly_notice_level`
 - Yearly files: `world_bank_lac_2015_notice_level.csv` ... `world_bank_lac_2025_notice_level.csv`
 - Merged file: `world_bank_lac_2015_2025_notice_level_merged.csv`
+
+## Online Viewer (GitHub Pages)
+
+This repository includes a browser-based viewer in `docs/` so supervisors can inspect records online without downloading files.
+
+- Viewer entry: `docs/index.html`
+- Viewer dataset: `docs/data/world_bank_lac_2015_2025_notice_level_merged.csv`
+
+### Enable on GitHub
+
+1. Open repository settings on GitHub.
+2. Go to **Pages**.
+3. Under **Build and deployment**, choose:
+	- Source: **Deploy from a branch**
+	- Branch: **main**
+	- Folder: **/docs**
+4. Save.
+
+After deployment, your site URL will look like:
+
+`https://rubingwang.github.io/CapstoneWB/`
+
+The page supports filtering by year, country, and notice type, plus keyword search and pagination.

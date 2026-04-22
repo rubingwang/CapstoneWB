@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CapstoneWB Data Viewer</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <h1>CapstoneWB: World Bank Contracts Viewer</h1>
+        <p>
+          Interactive view for LAC procurement notices (2015-2025). Filter by year, country, and notice type,
+          then inspect notice-level contract records directly in the browser.
+        </p>
+      </header>
+
+      <section class="panel filters">
+        <div class="field">
+          <label for="yearFilter">Year</label>
+          <select id="yearFilter">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="countryFilter">Country</label>
+          <select id="countryFilter">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="noticeTypeFilter">Notice Type</label>
+          <select id="noticeTypeFilter">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="field field-wide">
+          <label for="searchInput">Search (project, winner, notice no, method)</label>
+          <input id="searchInput" type="text" placeholder="Type keywords..." />
+        </div>
+        <div class="field actions">
+          <button id="resetBtn" type="button">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel stats">
+        <div id="statusText">Loading dataset...</div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Date Awarded</th>
+                <th>Country</th>
+                <th>Notice Type</th>
+                <th>Notice No</th>
+                <th>Project ID</th>
+                <th>Project Name</th>
+                <th>Winner</th>
+                <th>Winner Country</th>
+                <th>Contract Currency</th>
+                <th>Contract Amount</th>
+                <th>Procurement Method</th>
+                <th>Contract URL</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel pagination">
+        <button id="prevBtn" type="button">Previous</button>
+        <span id="pageInfo">Page 1</span>
+        <button id="nextBtn" type="button">Next</button>
+      </section>
+    </main>
+  </body>
+  </html>
