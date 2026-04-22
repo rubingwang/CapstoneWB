@@ -1,5 +1,11 @@
 # CapstoneWB
 
+## Live Site
+
+For a quick view of the dataset without downloading files, open the browser viewer here:
+
+- [CapstoneWB Data Viewer](https://rubingwang.github.io/CapstoneWB/)
+
 ## Summary
 
 CapstoneWB is a Python scraping pipeline for World Bank procurement notices, focused on Latin America and the Caribbean (LAC). It pulls notice data from the official World Bank procurement API, enriches records with conservative text parsing from notice detail content, and exports thesis-ready CSV datasets.

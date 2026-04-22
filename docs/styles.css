@@ -44,6 +44,11 @@ body {
   font-size: 0.9rem;
 }
 
+.site-note {
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
