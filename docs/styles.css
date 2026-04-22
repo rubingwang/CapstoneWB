@@ -39,6 +39,11 @@ body {
   color: var(--muted);
 }
 
+.repo-note {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);

@@ -16,6 +16,13 @@
           Interactive view for LAC procurement notices (2015-2025). Filter by year, country, and notice type,
           then inspect notice-level contract records directly in the browser.
         </p>
+        <p class="repo-note">
+          Project repository (source code + README):
+          <a href="https://github.com/rubingwang/CapstoneWB" target="_blank" rel="noopener noreferrer">
+            https://github.com/rubingwang/CapstoneWB
+          </a>
+        </p>
+        <p id="dataUpdatedAt">Data updated at (UTC): loading...</p>
       </header>
 
       <section class="panel filters">
@@ -60,21 +67,7 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Year</th>
-                <th>Date Awarded</th>
-                <th>Country</th>
-                <th>Notice Type</th>
-                <th>Notice No</th>
-                <th>Project ID</th>
-                <th>Project Name</th>
-                <th>Winner</th>
-                <th>Winner Country</th>
-                <th>Contract Currency</th>
-                <th>Contract Amount</th>
-                <th>Procurement Method</th>
-                <th>Contract URL</th>
-              </tr>
+              <tr id="tableHeadRow"></tr>
             </thead>
             <tbody id="tableBody"></tbody>
           </table>
