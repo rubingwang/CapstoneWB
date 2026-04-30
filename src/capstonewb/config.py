@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 
 WORLD_BANK_NOTICES_API = "https://search.worldbank.org/api/v2/procnotices"
+WORLD_BANK_CONTRACTS_API = "https://search.worldbank.org/api/contractdata"
 WORLD_BANK_COUNTRY_API = "https://api.worldbank.org/v2/country"
 
 LAC_REGION_ID = "LCN"

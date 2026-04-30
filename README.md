@@ -8,7 +8,7 @@ For a quick view of the dataset without downloading files, open the browser view
 
 ## Summary
 
-CapstoneWB is a Python scraping pipeline for World Bank procurement notices, focused on Latin America and the Caribbean (LAC). It pulls notice data from the official World Bank procurement API, enriches records with conservative text parsing from notice detail content, and exports thesis-ready CSV datasets.
+CapstoneWB is a Python scraping pipeline for World Bank procurement notices, focused on Latin America and the Caribbean (LAC). It pulls notice data from the official World Bank procurement API, and it also supports the procurement `CONTRACTS` tab through the World Bank contract data API.
 
 Current workflow supports:
 
@@ -16,12 +16,14 @@ Current workflow supports:
 - Yearly exports (for example, 2015-2025: one CSV per year)
 - A merged export that combines all yearly files into one dataset
 - Conservative null-first logic: when a field is not reliably present, leave it blank instead of guessing
+- Contract-tab extraction for LAC contracts with contractor-country filtering
 
 ## Data Scope
 
 - Region: Latin America and the Caribbean (LAC)
 - Source APIs:
 	- World Bank Procurement Notices API (`search.worldbank.org/api/v2/procnotices`)
+	- World Bank Contract Data API (`search.worldbank.org/api/contractdata`)
 	- World Bank Country Metadata API
 - Typical period: 2015-2025 (configurable by CLI arguments)
 
@@ -70,7 +72,7 @@ All columns come from `ProcurementRecord`.
 - `date_awarded`: Full award notification date parsed from `Date Notification of Award Issued` (`YYYY/MM/DD` when available).
 - `data_source`: Data origin label (currently `World Bank`).
 - `procurement_channel`: Procurement channel label (currently MDB-financed channel label).
-- `funding_source`: Funding identifiers extracted from API credit/financing blocks.
+- `funding_source`: Funding identifiers extracted from API credit/financing blocks. Contract-tab rows usually leave this blank because the contract feed does not expose the notice credit block.
 - `sector`: Sector value extracted from notice metadata.
 - `project_type`: Inferred project type from procurement grouping metadata.
 - `contract_value_usd`: Contract value in USD when a reliable USD value exists; otherwise blank.
@@ -79,12 +81,12 @@ All columns come from `ProcurementRecord`.
 - `contract_duration_original_unit`: Duration unit in source text (`Day(s)`, `Week(s)`, `Month(s)`, `Year(s)` when present).
 - `contract_duration_original`: Numeric duration in original unit.
 - `contract_duration_days`: Duration normalized to days.
-- `winning_firm_name`: Parsed awarded winner name.
-- `winning_firm_code`: Winner code parsed from winner name block (for example, bracketed numeric code).
-- `winning_firm_country`: Parsed winner country.
+- `winning_firm_name`: Parsed awarded winner name. For contract-tab rows, this comes from the supplier name in the contract feed.
+- `winning_firm_code`: Winner code parsed from winner name block (for example, bracketed numeric code). For contract-tab rows, this comes from the supplier ID when available.
+- `winning_firm_country`: Parsed winner country. For contract-tab rows, this comes from the supplier country in the contract feed.
 - `winning_firm_is_chinese`: Winner-country-based flag: China=1, non-China=0, unknown country=blank.
 - `winning_firm_is_soe`: Best-effort inferred SOE indicator from available text cues; blank if unavailable.
-- `number_of_bidders`: Parsed/derived bidder count.
+- `number_of_bidders`: Parsed/derived bidder count. Not exposed by the contract feed, so it stays blank for contract-tab exports.
 - `if_single_bidder`: Single-bid indicator (1 if single bidder condition is met, else 0/blank based on available data).
 - `bidder_country_lowest_price`: Bidder country associated with lowest parsed bidder price.
 - `bidder_lowest_price`: Lowest parsed bidder price.
@@ -120,6 +122,20 @@ capstonewb scrape-world-bank \
 	--notice-level \
 	--rows 500 \
 	--output data/world_bank_lac_2024_notice_level.csv
+```
+
+### Contract Tab Sample
+
+```bash
+capstonewb scrape-world-bank \
+	--contracts \
+	--start-year 2015 \
+	--end-year 2025 \
+	--region-name "Latin America and Caribbean" \
+	--contractor-country China \
+	--rows 500 \
+	--limit 20 \
+	--output data/world_bank_lac_contracts_china_sample.csv
 ```
 
 ### Yearly Files + Merged File (2015-2025)

@@ -13,20 +13,22 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 import pandas as pd
+import requests
 
-from .config import DEFAULT_ROWS_PER_PAGE, WORLD_BANK_COUNTRY_API, WORLD_BANK_NOTICES_API
+from .config import DEFAULT_ROWS_PER_PAGE, WORLD_BANK_CONTRACTS_API, WORLD_BANK_COUNTRY_API, WORLD_BANK_NOTICES_API
 from .models import ProcurementRecord
 
 
 _USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X) CapstoneWB/0.1"
 _DETAIL_WORKERS = 8
 _PROCUREMENT_DETAIL_BASE_URL = "https://projects.worldbank.org/en/projects-operations/procurement-detail"
+_CONTRACT_OVERVIEW_BASE_URL = "https://projects.worldbank.org/en/projects-operations/contractoverview"
 
 
 def _json_get(url: str) -> Any:
-    request = Request(url, headers={"User-Agent": _USER_AGENT})
-    with urlopen(request, timeout=30) as response:
-        return json.load(response)
+    response = requests.get(url, headers={"User-Agent": _USER_AGENT}, timeout=30)
+    response.raise_for_status()
+    return response.json()
 
 
 def _json_get_with_retry(url: str, attempts: int = 3, delay_seconds: float = 1.0) -> Any:
@@ -396,6 +398,12 @@ def _build_contract_url(record_id: str | None) -> str | None:
     return f"{_PROCUREMENT_DETAIL_BASE_URL}/{record_id}"
 
 
+def _build_contract_overview_url(record_id: str | None) -> str | None:
+    if not record_id:
+        return None
+    return f"{_CONTRACT_OVERVIEW_BASE_URL}/{record_id}"
+
+
 def _derive_firm_registered_locally(winning_firm_country: str | None, project_country: str | None) -> int | None:
     if not winning_firm_country:
         return None
@@ -415,6 +423,90 @@ def _split_semicolon_values(value: str | None) -> list[str]:
     if not value:
         return []
     return [item.strip() for item in value.split(";") if item.strip()]
+
+
+def _split_multi_value(value: Any) -> list[str]:
+    if value in (None, ""):
+        return []
+    if isinstance(value, list):
+        return [_normalize_text(str(item)) for item in value if _normalize_text(str(item))]
+    if isinstance(value, str):
+        return _split_semicolon_values(value)
+    text = _normalize_text(str(value))
+    return [text] if text else []
+
+
+def _join_values(values: list[str]) -> str | None:
+    return "; ".join(values) if values else None
+
+
+def _parse_contract_signing_date(value: Any) -> tuple[str | None, int | None]:
+    if not value:
+        return None, None
+    text = _normalize_text(str(value))
+    for fmt in ("%d-%b-%Y", "%Y-%m-%d", "%Y/%m/%d"):
+        try:
+            parsed = datetime.strptime(text, fmt)
+            return parsed.strftime("%Y-%m-%d"), parsed.year
+        except ValueError:
+            continue
+    year_match = re.search(r"\b(20\d{2})\b", text)
+    if year_match:
+        return text or None, int(year_match.group(1))
+    return text or None, None
+
+
+def _extract_contract_value_usd(contract: dict[str, Any]) -> float | None:
+    for key in ("total_contr_amnt", "supplier_contr_amount", "contr_amt"):
+        value = contract.get(key)
+        if isinstance(value, list):
+            value = value[0] if value else None
+        parsed = _parse_float(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def _extract_contract_sector(contract: dict[str, Any]) -> str | None:
+    major_sector = contract.get("mjsecname")
+    if isinstance(major_sector, list):
+        values = [_normalize_text(str(item)) for item in major_sector if _normalize_text(str(item))]
+        if values:
+            return "; ".join(values)
+    elif major_sector:
+        text = _normalize_text(str(major_sector))
+        if text:
+            return text
+
+    sector = contract.get("sector")
+    if isinstance(sector, list):
+        values = [_normalize_text(str(item)) for item in sector if _normalize_text(str(item))]
+        if values:
+            return "; ".join(values)
+    elif sector:
+        text = _normalize_text(str(sector))
+        if text:
+            return text
+    return None
+
+
+def _extract_contract_project_type(contract: dict[str, Any]) -> str | None:
+    value = contract.get("procurement_group_desc") or contract.get("procurement_group")
+    if not value:
+        return None
+    return _normalize_text(str(value)) or None
+
+
+def _extract_contract_supplier_country(contract: dict[str, Any]) -> str | None:
+    return _join_values(_split_multi_value(contract.get("supplier_countryshortname")))
+
+
+def _extract_contract_supplier_name(contract: dict[str, Any]) -> str | None:
+    return _join_values(_split_multi_value(contract.get("supp_name")))
+
+
+def _extract_contract_supplier_code(contract: dict[str, Any]) -> str | None:
+    return _join_values(_split_multi_value(contract.get("supp_id")))
 
 
 def _parse_price_number(value: str) -> float | None:
@@ -506,6 +598,58 @@ def fetch_world_bank_notices(
         seen_record_ids=seen_record_ids,
         seen_project_keys=seen_project_keys,
     )
+
+
+def fetch_world_bank_contracts(
+    start_year: int = 2015,
+    end_year: int = 2025,
+    rows: int = DEFAULT_ROWS_PER_PAGE,
+    limit: int | None = None,
+    region_name: str = "Latin America and Caribbean",
+    contractor_country: str | None = "China",
+) -> list[ProcurementRecord]:
+    records: list[ProcurementRecord] = []
+    seen_record_ids: set[str] = set()
+    page = 0
+
+    while True:
+        params = {
+            "format": "json",
+            "fl": "*",
+            "rows": str(rows),
+            "os": str(page * rows),
+            "apilang": "en",
+            "srce": "both",
+            "regionname_exact": region_name,
+        }
+        if contractor_country:
+            params["supplier_countryshortname_exact"] = contractor_country
+
+        url = f"{WORLD_BANK_CONTRACTS_API}?{urlencode(params)}"
+        try:
+            payload = _json_get_with_retry(url)
+        except Exception:
+            break
+
+        contracts = payload.get("contract", [])
+        if not contracts:
+            break
+
+        for contract in contracts:
+            record = _to_contract_record(contract)
+            if record.record_id and record.record_id in seen_record_ids:
+                continue
+            if record.record_id:
+                seen_record_ids.add(record.record_id)
+            records.append(record)
+            if limit is not None and len(records) >= limit:
+                return records
+
+        page += 1
+        if page * rows >= int(payload.get("total", 0)):
+            break
+
+    return records
 
 
 def _fetch_world_bank_notices_for_scope(
@@ -666,6 +810,55 @@ def _to_record(notice: dict[str, Any]) -> ProcurementRecord:
         bid_reference_no=notice.get("bid_reference_no"),
         project_name=notice.get("project_name"),
         contract_url=_build_contract_url(record_id),
+    )
+
+
+def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
+    signing_date, year_awarded = _parse_contract_signing_date(contract.get("contr_sgn_date"))
+    supplier_country = _extract_contract_supplier_country(contract)
+    supplier_name = _extract_contract_supplier_name(contract)
+    supplier_code = _extract_contract_supplier_code(contract)
+
+    return ProcurementRecord(
+        project_id=contract.get("projectid"),
+        notice_type="Contract",
+        notice_no=contract.get("id"),
+        country=contract.get("countryshortname"),
+        year_awarded=year_awarded,
+        date_awarded=signing_date,
+        data_source="World Bank",
+        procurement_channel="Project procurement contracts",
+        funding_source=None,
+        sector=_extract_contract_sector(contract),
+        project_type=_extract_contract_project_type(contract),
+        contract_value_usd=_extract_contract_value_usd(contract),
+        contract_currency=None,
+        contract_amount=None,
+        contract_duration_original_unit=None,
+        contract_duration_original=None,
+        contract_duration_days=None,
+        winning_firm_name=supplier_name,
+        winning_firm_code=supplier_code,
+        winning_firm_country=supplier_country,
+        winning_firm_is_chinese=_parse_winning_firm_is_chinese(supplier_country),
+        winning_firm_is_soe=None,
+        number_of_bidders=None,
+        if_single_bidder=None,
+        bidder_country_lowest_price=None,
+        bidder_lowest_price=None,
+        bidder_country=None,
+        bidder_price_currency=None,
+        bidder_price=None,
+        procurement_method=contract.get("procu_meth_text"),
+        financing_linked_to_bid=None,
+        financing_source_chinese=None,
+        joint_venture=None,
+        firm_registered_locally=_derive_firm_registered_locally(supplier_country, contract.get("countryshortname")),
+        record_id=contract.get("id"),
+        awarded_date=signing_date,
+        bid_reference_no=contract.get("contr_refnum"),
+        project_name=contract.get("project_name"),
+        contract_url=_build_contract_overview_url(contract.get("id")),
     )
 
 

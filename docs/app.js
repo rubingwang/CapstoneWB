@@ -1,6 +1,5 @@
-const DATA_PATH =
-  "https://raw.githubusercontent.com/rubingwang/CapstoneWB/main/data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv";
-const DATA_UPDATED_AT_MADRID = "2026-04-22 14:23:05 CEST";
+const DATA_PATH = "data/world_bank_lac_contracts_china_60.csv";
+const DATA_UPDATED_AT_MADRID = "2026-04-30 12:00:00 CEST";
 const PAGE_SIZE = 50;
 
 const state = {

@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 from .config import DEFAULT_END_YEAR, DEFAULT_OUTPUT_DIR, DEFAULT_START_YEAR
-from .world_bank import fetch_world_bank_notices, save_records
+from .world_bank import fetch_world_bank_contracts, fetch_world_bank_notices, save_records
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,20 +21,33 @@ def build_parser() -> argparse.ArgumentParser:
     scrape.add_argument("--rows", type=int, default=500)
     scrape.add_argument("--all-notice-types", action="store_true", help="Do not filter by notice type")
     scrape.add_argument("--notice-level", action="store_true", help="Keep all notices (no project-level dedup)")
+    scrape.add_argument("--contracts", action="store_true", help="Scrape the CONTRACTS tab instead of notices")
+    scrape.add_argument("--region-name", type=str, default="Latin America and Caribbean", help="Contract region filter")
+    scrape.add_argument("--contractor-country", type=str, default="China", help="Contractor country filter")
     scrape.set_defaults(func=_run_scrape_world_bank)
 
     return parser
 
 
 def _run_scrape_world_bank(args: argparse.Namespace) -> int:
-    records = fetch_world_bank_notices(
-        start_year=args.start_year,
-        end_year=args.end_year,
-        limit=args.limit,
-        rows=args.rows,
-        notice_type=None if args.all_notice_types else "Contract Award",
-        deduplicate_projects=not args.notice_level,
-    )
+    if args.contracts:
+        records = fetch_world_bank_contracts(
+            start_year=args.start_year,
+            end_year=args.end_year,
+            limit=args.limit,
+            rows=args.rows,
+            region_name=args.region_name,
+            contractor_country=args.contractor_country,
+        )
+    else:
+        records = fetch_world_bank_notices(
+            start_year=args.start_year,
+            end_year=args.end_year,
+            limit=args.limit,
+            rows=args.rows,
+            notice_type=None if args.all_notice_types else "Contract Award",
+            deduplicate_projects=not args.notice_level,
+        )
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     save_records(records, str(output_path))
