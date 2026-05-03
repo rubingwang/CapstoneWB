@@ -209,7 +209,23 @@ function loadData() {
     complete: (res) => {
       state.rows = res.data;
       state.filteredRows = [...state.rows];
-      state.columns = chooseColumns(state.rows);
+      // Prefer explicit ordering so `project_name` appears before link column `contract_url`.
+      const preferredColumns = [
+        "year_awarded",
+        "date_awarded",
+        "country",
+        "winning_firm_country",
+        "notice_type",
+        "notice_no",
+        "project_id",
+        "project_name",
+        "contract_url",
+      ];
+      const available = state.rows.length ? Object.keys(state.rows[0]) : [];
+      state.columns = [
+        ...preferredColumns.filter((c) => available.includes(c)),
+        ...available.filter((c) => !preferredColumns.includes(c)),
+      ];
 
       fillSelect(dom.yearFilter, optionValues(state.rows, "year_awarded"));
       fillSelect(dom.countryFilter, optionValues(state.rows, "country"));
