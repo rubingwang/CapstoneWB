@@ -138,7 +138,7 @@ def main():
         return cache[n]['name_zh']
 
     df['winning_firm_name_zh'] = df['winning_firm_name'].fillna('').astype(str).map(lambda x: lookup(x) if x else None)
-    df.to_csv(MERGED, index=False)
+    df.to_csv(MERGED, index=False, encoding='utf-8-sig')
     print('Updated', MERGED)
 
 

@@ -92,8 +92,8 @@ def main():
     # ensure columns types consistent
     merged = pd.concat([wb_df, idb_mapped], ignore_index=True, sort=False)
 
-    # write
-    merged.to_csv(OUT_PATH, index=False)
+    # write with utf-8-sig for proper Unicode support in Excel
+    merged.to_csv(OUT_PATH, index=False, encoding='utf-8-sig')
     print('Wrote merged dataset to', OUT_PATH)
 
 
