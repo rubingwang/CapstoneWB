@@ -3,8 +3,8 @@
 
 Strategy:
 - For each unique `winning_firm_name` in `data/worldbank_idb_merged.csv`, try:
-  1. Query English Wikipedia for the firm and fetch Chinese interlanguage title.
-  2. If not found, fall back to LibreTranslate (public instance) for machine translation.
+    1. Query English Wikipedia for the firm and fetch Chinese interlanguage title.
+    2. If not found, use a public translation endpoint to translate the firm name into Chinese.
 
 Outputs:
 - updates `data/worldbank_idb_merged.csv` adding `winning_firm_name_zh`
@@ -25,7 +25,8 @@ REPORT_DIR = ROOT / 'reports'
 REPORT = REPORT_DIR / 'firm_name_chinese_review.csv'
 
 WIKI_API = 'https://en.wikipedia.org/w/api.php'
-LIBRE_URL = 'https://libretranslate.com/translate'
+MYMEMORY_URL = 'https://api.mymemory.translated.net/get'
+GOOGLE_TRANSLATE_URL = 'https://translate.googleapis.com/translate_a/single'
 
 
 def load_cache():
@@ -73,14 +74,43 @@ def wiki_chinese_title(name):
         return None
 
 
-def libre_translate(text):
+def translate_to_chinese(text):
+    """Translate an English firm name to Chinese using public endpoints.
+
+    Preference order:
+    - MyMemory (often returns a full Chinese company name)
+    - Google translate endpoint (fallback)
+    """
     try:
-        resp = requests.post(LIBRE_URL, data={'q': text, 'source': 'en', 'target': 'zh', 'format': 'text'}, timeout=15)
-        if resp.status_code == 200:
-            j = resp.json()
-            return j.get('translatedText')
+        r = requests.get(
+            MYMEMORY_URL,
+            params={'q': text, 'langpair': 'en|zh-CN'},
+            timeout=20,
+        )
+        if r.ok:
+            data = r.json()
+            translated = (data.get('responseData') or {}).get('translatedText')
+            if translated and translated.strip():
+                return translated.strip(), 'machine_translated:mymemory', MYMEMORY_URL
     except Exception:
-        return None
+        pass
+
+    try:
+        r = requests.get(
+            GOOGLE_TRANSLATE_URL,
+            params={'client': 'gtx', 'sl': 'en', 'tl': 'zh-CN', 'dt': 't', 'q': text},
+            timeout=20,
+        )
+        if r.ok:
+            data = r.json()
+            chunks = data[0] if data else []
+            translated = ''.join(part[0] for part in chunks if part and part[0])
+            if translated and translated.strip():
+                return translated.strip(), 'machine_translated:google', GOOGLE_TRANSLATE_URL
+    except Exception:
+        pass
+
+    return None, 'not_found', ''
 
 
 def main():
@@ -110,11 +140,11 @@ def main():
             time.sleep(0.5)
             continue
 
-        # fallback to libre translate
-        zh = libre_translate(name)
+        # fallback to machine translation
+        zh, source, ref = translate_to_chinese(name)
         if zh:
-            cache[name] = {'name_zh': zh, 'source': 'machine_translated', 'ref': LIBRE_URL}
-            rows.append({'name': name, 'name_zh': zh, 'source': 'machine_translated', 'ref': LIBRE_URL})
+            cache[name] = {'name_zh': zh, 'source': source, 'ref': ref}
+            rows.append({'name': name, 'name_zh': zh, 'source': source, 'ref': ref})
             save_cache(cache)
             time.sleep(0.5)
             continue
