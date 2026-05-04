@@ -1,5 +1,9 @@
-const DATA_PATH = "data/world_bank_lac_contracts_china_60.csv";
-const DATA_UPDATED_AT_MADRID = "2026-04-30 12:00:00 CEST";
+const DATA_SOURCES = {
+  'wb_only': { label: 'World Bank Only', path: 'data/world_bank_lac_contracts_china_60.csv' },
+  'merged': { label: 'World Bank + IDB (Merged)', path: 'data/worldbank_idb_merged.csv' },
+};
+const DEFAULT_SOURCE = 'merged';
+const DATA_UPDATED_AT_MADRID = "2026-05-04 13:15:00 CEST";
 const PAGE_SIZE = 50;
 
 const state = {
@@ -7,9 +11,11 @@ const state = {
   filteredRows: [],
   currentPage: 1,
   columns: [],
+  currentSource: DEFAULT_SOURCE,
 };
 
 const dom = {
+  dataSourceSelect: document.getElementById("dataSourceSelect"),
   dataUpdatedAt: document.getElementById("dataUpdatedAt"),
   yearFilter: document.getElementById("yearFilter"),
   countryFilter: document.getElementById("countryFilter"),
@@ -170,6 +176,11 @@ function render() {
 }
 
 function wireEvents() {
+  dom.dataSourceSelect.addEventListener("change", (e) => {
+    state.currentSource = e.target.value;
+    state.currentPage = 1;
+    loadData();
+  });
   dom.yearFilter.addEventListener("change", applyFilters);
   dom.countryFilter.addEventListener("change", applyFilters);
   dom.noticeTypeFilter.addEventListener("change", applyFilters);
@@ -202,7 +213,8 @@ function wireEvents() {
 }
 
 function loadData() {
-  Papa.parse(DATA_PATH, {
+  const dataPath = DATA_SOURCES[state.currentSource].path;
+  Papa.parse(dataPath, {
     download: true,
     header: true,
     skipEmptyLines: true,
@@ -241,5 +253,16 @@ function loadData() {
   });
 }
 
+function initDataSourceSelect() {
+  for (const [key, src] of Object.entries(DATA_SOURCES)) {
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = src.label;
+    opt.selected = key === DEFAULT_SOURCE;
+    dom.dataSourceSelect.appendChild(opt);
+  }
+}
+
 dom.dataUpdatedAt.textContent = `Data updated at (Madrid time): ${DATA_UPDATED_AT_MADRID}`;
+initDataSourceSelect();
 loadData();
