@@ -226,6 +226,8 @@ function loadData() {
         "year_awarded",
         "date_awarded",
         "country",
+        "winning_firm_name",
+        "winning_firm_name_zh",
         "winning_firm_country",
         "notice_type",
         "notice_no",
