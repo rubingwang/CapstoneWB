@@ -1,6 +1,6 @@
 const DATA_SOURCES = {
   'wb_only': { label: 'World Bank Only', path: 'data/world_bank_lac_contracts_china_60.csv' },
-  'merged': { label: 'World Bank + IDB (Merged)', path: 'data/worldbank_idb_merged.csv' },
+  'merged': { label: 'World Bank + IDB + AIDDATA + CDB (Merged)', path: 'data/worldbank_idb_aiddata_cdb_merged.csv' },
 };
 const DEFAULT_SOURCE = 'merged';
 const DATA_UPDATED_AT_MADRID = "2026-05-04 13:15:00 CEST";

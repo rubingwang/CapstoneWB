@@ -19,7 +19,7 @@ import time
 import csv
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = ROOT / 'data' / 'worldbank_idb_merged.csv'
+MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
 CACHE = ROOT / 'data' / 'firm_name_chinese_cache.json'
 REPORT_DIR = ROOT / 'reports'
 REPORT = REPORT_DIR / 'firm_name_chinese_review.csv'

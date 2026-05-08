@@ -16,7 +16,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIRS = [ROOT / 'data' / 'aiddata', ROOT / 'data' / 'caribbean_development_bank']
-MERGED_PATH = ROOT / 'data' / 'worldbank_idb_merged.csv'
+MERGED_PATH = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
 
 
 def excel_to_csv(xpath, out_csv):

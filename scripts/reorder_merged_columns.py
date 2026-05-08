@@ -4,7 +4,7 @@ import pandas as pd
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = ROOT / 'data' / 'worldbank_idb_merged.csv'
+MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
 
 df = pd.read_csv(MERGED, dtype=str)
 

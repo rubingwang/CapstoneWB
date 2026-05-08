@@ -10,7 +10,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 WB_PATH = ROOT / 'data' / 'worldbank' / 'world_bank_lac_contracts_china_60.csv'
 IDB_PATH = ROOT / 'data' / 'idb' / 'IDB_Project_Procurement_Awards_Dataset.csv'
-OUT_PATH = ROOT / 'data' / 'worldbank_idb_merged.csv'
+OUT_PATH = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
 
 
 def load_csv(path):

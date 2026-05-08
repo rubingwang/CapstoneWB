@@ -146,7 +146,7 @@ The merged dataset combines **World Bank (WB) procurement contracts** with **Int
 
 ## File Locations | 文件位置
 
-- **Main merged dataset**: `data/worldbank_idb_merged.csv`
+- **Main merged dataset**: `data/worldbank_idb_aiddata_cdb_merged.csv`
 - **World Bank only**: `data/worldbank/world_bank_lac_contracts_china_60.csv`
 - **IDB data**: `data/idb/IDB_Project_Procurement_Awards_Dataset.csv`
 - **Cache (Chinese lookups)**: `data/firm_name_chinese_cache.json`
@@ -164,7 +164,7 @@ The merged dataset combines **World Bank (WB) procurement contracts** with **Int
    - Switch between "World Bank Only" and "World Bank + IDB (Merged)" datasets
    - Click links to view original contract details
 
-2. **Download Data**: Download `data/worldbank_idb_merged.csv` for offline analysis.
+2. **Download Data**: Download `data/worldbank_idb_aiddata_cdb_merged.csv` for offline analysis.
 
 3. **Source Code**: Refer to scripts for data processing logic and reproducibility.
 
