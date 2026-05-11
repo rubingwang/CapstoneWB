@@ -6,6 +6,7 @@ Outputs: data/worldbank_idb_merged.csv
 import pandas as pd
 from pathlib import Path
 import numpy as np
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 WB_PATH = ROOT / 'data' / 'worldbank' / 'world_bank_lac_contracts_china_60.csv'
@@ -95,6 +96,12 @@ def main():
     # write with utf-8-sig for proper Unicode support in Excel
     merged.to_csv(OUT_PATH, index=False, encoding='utf-8-sig')
     print('Wrote merged dataset to', OUT_PATH)
+    # Export both CSV (utf-8-sig) and Excel copy for downstream use
+    try:
+        subprocess.run(['python3', 'scripts/save_both_formats.py', str(OUT_PATH)], check=False)
+        print('Exported CSV and Excel copies via save_both_formats.py')
+    except Exception as e:
+        print('Failed to export copies:', e)
 
 
 if __name__ == '__main__':

@@ -49,6 +49,13 @@ def main():
 
     df.to_csv(MERGED, index=False, encoding='utf-8-sig')
     print(f'Cleaned Chinese names: non-empty before={before_nonempty}, after={after_nonempty}')
+    # Export CSV + Excel copies after cleaning
+    try:
+        import subprocess
+        subprocess.run(['python3', 'scripts/save_both_formats.py', str(MERGED)], check=False)
+        print('Exported CSV and Excel copies via save_both_formats.py')
+    except Exception as e:
+        print('Failed to export copies:', e)
 
 
 if __name__ == '__main__':

@@ -63,3 +63,10 @@ df = df[final_order]
 df.to_csv(MERGED, index=False, encoding='utf-8-sig')
 print(f'Reordered columns in {MERGED}')
 print(f'Column order: {", ".join(final_order[:10])}... (showing first 10)')
+# Export CSV + Excel copies after reordering
+try:
+    import subprocess
+    subprocess.run(['python3', 'scripts/save_both_formats.py', str(MERGED)], check=False)
+    print('Exported CSV and Excel copies via save_both_formats.py')
+except Exception as e:
+    print('Failed to export copies:', e)

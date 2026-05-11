@@ -97,6 +97,13 @@ def main():
         result = pd.concat([merged_df, new], ignore_index=True, sort=False)
         result.to_csv(MERGED_PATH, index=False, encoding='utf-8-sig')
         print('Appended', len(new), 'rows and updated merged file at', MERGED_PATH)
+        # Export CSV + Excel copies
+        try:
+            import subprocess
+            subprocess.run(['python3', 'scripts/save_both_formats.py', str(MERGED_PATH)], check=False)
+            print('Exported CSV and Excel copies via save_both_formats.py')
+        except Exception as e:
+            print('Failed to export copies:', e)
     else:
         print('No rows appended. Nothing changed.')
 
