@@ -16,10 +16,31 @@ MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
 # EDIT THIS DICT with correct Chinese names based on your research
 # English name (as it appears in CSV) -> Chinese name
 COMPANY_NAME_CORRECTIONS = {
-    # TODO: You can paste the correct Chinese names here
-    # Example format:
-    # 'POWERCHINA JIANGXI ELECTRIC POWER CONSTRUCTION COMPANY LIMITED': '国家电网有限公司江西分公司',
-    # 'China MEHECO Corporation': '中国医药对外贸易总公司',
+    'POWERCHINA JIANGXI ELECTRIC POWER CONSTRUCTION COMPANY LIMITED': '中国电力建设集团有限公司江西电力建设分公司',
+    'China MEHECO Corporation': '中国医药对外贸易总公司',
+    'SINOPHARM FORTUNE INTERNATIONAL TRADING CORP': '中国医药集团有限公司国际贸易分公司',
+    'SUMEC COMPLETE EQUIPMENT': '苏梅达集团股份有限公司',
+    'CHINA ROAD AND BRIDGE COR': '中国路桥工程有限责任公司',
+    'CHINA NATIONAL MACHINERY IMP & EXP-CMC; CNR CHANGCHUN RAILWAY VEHICLES CO, LTD': '中国机械进出口集团有限公司；中国国铁集团长春车辆厂',
+    'CHINA NATIONAL COMPLETE PLANT IMPORT & EXPORT SHANGHAI CORPORATION; C.O. WILLIAMS (ST. LUCIA) LTD.': '中国成套设备进出口集团有限公司；威廉姆斯公司（圣卢西亚）',
+    'HENGTONG OPTIC ELECTRIC C': '亨通集团股份有限公司',
+    'CHINA NAT CABLE ENG. CO.': '中国国电布防有限公司',
+    'CHANGJIANG INSTITUTE OF SURVEY PLANNIG DESING AND RESEARCH': '长江勘测规划设计研究有限公司',
+    'CIMC-TIANDA NETHERLANDS COOPERATIEF U.A. (NETHERLANDS); SHENZHEN CIMC-TIANDA AIRPORT SUPPORT LTD.': '中集天阳集团有限公司',
+    'Jagui S.A.C.; Weihai Construction Group Co., Ltd.': '威海建设集团有限公司',
+    'INSTEC-SINO SOAR CONSORTIUM': '中国科学院战略研究联合体',
+    'PCI-SINOPHARMINTL CONSORT': '中国医药集团国际联合体',
+    'CMC-CSEEC CONSORTIUM': '中国机械工程-中国成套集团联合体',
+    'NANJING DAJI STELL TM': '南京大吉钢铁有限公司',
+    'POWER CHINA JHIANXI ELECTRIC POWER CONTRUCTION CO. LTD.': '中国电力建设集团有限公司江西分公司',
+    'Joint Venture: China Road and Bridge Corporation & Kuldipsingh Infra NV': '中国路桥工程有限责任公司与库迪普辛格基础设施公司合资',
+    'Joint Venture of SUMEC Complete Equipment & Engineering Co. Ltd and XJ Group Corporation': '苏梅达集团与新晶集团合资',
+    'THE 23RD METALLURGICAL CO': '第23冶金建设有限公司',
+    'CMEC - SINOPHARMINTL CONS': '中国机械工程-国药国际联合体',
+    'CHINANAT.ELEC W&CIMP/EXP': '中国国电进出口有限公司',
+    'CHINA NATIONAL W&C M&X': '中国机械进出口集团有限公司',
+    'ASOCIACION ACCIDENTAL S&Z': '萨斯万德兹公司联合体',
+    'METRO LINEA 1 S.A.S': '第一地铁线公司',
 }
 
 
