@@ -90,8 +90,26 @@ def main():
 
     idb_mapped = map_idb_to_wb(idb_df, wb_cols)
 
+    # If merged file exists, preserve enriched columns (e.g., winning_firm_name_zh, soe)
+    preserved_cols = {}
+    if OUT_PATH.exists():
+        old_merged = load_csv(OUT_PATH)
+        # Save enriched columns that may exist
+        enriched_col_names = ['winning_firm_name_zh', 'soe']
+        for col in enriched_col_names:
+            if col in old_merged.columns:
+                preserved_cols[col] = old_merged[col]
+                print(f'Preserving enriched column: {col}')
+
     # ensure columns types consistent
     merged = pd.concat([wb_df, idb_mapped], ignore_index=True, sort=False)
+
+    # Restore enriched columns if they existed
+    for col, col_data in preserved_cols.items():
+        if col not in merged.columns:
+            # Pad with None for new rows (IDB rows added)
+            padded = list(col_data) + [None] * (len(merged) - len(col_data))
+            merged[col] = padded
 
     # write with utf-8-sig for proper Unicode support in Excel
     merged.to_csv(OUT_PATH, index=False, encoding='utf-8-sig')

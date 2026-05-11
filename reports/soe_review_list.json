@@ -1,0 +1,310 @@
+{
+  "total_companies": 43,
+  "total_rows": 56,
+  "likely_soe": [],
+  "likely_private": [
+    {
+      "cn_name": "宁波大卫医疗器械有限公司",
+      "en_name": "NINGBO DAVID MEDICAL DEVICE CO. LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "飞依诺科技有限公司",
+      "en_name": "VINNO TECHNOLOGY CO.",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "英菲泰克有限公司",
+      "en_name": "INFITEK CO LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "国药控股香港有限公司",
+      "en_name": "SINOPHARM INTERNATIONAL HONG KONG LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "和兴电气有限公司",
+      "en_name": "Hexing Electrical Co.,Ltd",
+      "rows": 3,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "英科医疗（香港）有限公司",
+      "en_name": "INTCO MEDICAL (HK) CO.",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "): 上海通全对外贸易有限公司",
+      "en_name": "): SHANGHAI TO-ALL FOREIGN TRADING CO",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "中山医疗科技有限公司",
+      "en_name": "CHISON MEDICAL TECHNOLOGIES CO",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "先生投资（香港）有限公司",
+      "en_name": "MR INVESTMENTS (HK) LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "江苏地质工程有限公司",
+      "en_name": "JIANGSU GEOLOGY & ENGINEERING CO. LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "华立作物有限公司",
+      "en_name": "HOLLEY CROPU CO. LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "英石。弗朗西斯医疗；吉布德马丁有限公司；海涅",
+      "en_name": "ST. FRANCIS MEDICAL; GEBRUDER MARTIN GMBH & CO. KG; HEINE",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "氩气；英石。方济各医疗",
+      "en_name": "ARGON; ST. FRANCIS MEDICAL",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "天津优固国际贸易有限公司",
+      "en_name": "TIANJIN YORKOOL INT TRADI",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "华大健康（香港）有限公司",
+      "en_name": "BGI HEALTH (HK) CO. LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "山东瑞泰玻璃绝缘子有限公司",
+      "en_name": "SHANDONG RUITAI GLASS INSULATOR CO.,LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "中翔混合动力科技有限公司",
+      "en_name": "SINO SOAR HYBRID TECH CO",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "中翔混合动力（北京）科技有限公司",
+      "en_name": "Sino Soar Hybrid (Beijing) Technology Co.,Ltd.",
+      "rows": 2,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "宇通客车股份有限公司",
+      "en_name": "YUTONG  BUS CO., LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "河南鼎力动力设备有限公司",
+      "en_name": "HENAN DINGLI POWER EQUIPM",
+      "rows": 2,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "特变电工山东鲁能泰山电缆有限公司",
+      "en_name": "TBEA SHANDONG LUNENG TAISHAN CABLE CO. LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "同方威视股份有限公司",
+      "en_name": "NUCTECH COMPANY LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "沃泰克有限公司",
+      "en_name": "WAVTEQ LIMITED",
+      "rows": 4,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "江祖中天科技有限公司",
+      "en_name": "JIANGZU ZHONGTIAN TEC CO",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "信息有限公司",
+      "en_name": "INFOCIVITAS LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "正泰电气股份有限公司",
+      "en_name": "CHINT ELECTRIC CO LTD",
+      "rows": 2,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "中天国际有限公司",
+      "en_name": "ZTT INTERNATIONAL LIMITED",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "科技有限公司",
+      "en_name": "NARI TECHNOLOGY CO LTD",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "科技/医疗行业特征"
+    },
+    {
+      "cn_name": "长江勘测规划设计研究有限公司",
+      "en_name": "CHANGJIANG INSTITUTE OF SURVEY PLANNIG DESING AND RESEARCH",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "南京大吉钢铁有限公司",
+      "en_name": "NANJING DAJI STELL TM",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    },
+    {
+      "cn_name": "千友信息技术（武汉）有限公司",
+      "en_name": "Qianyou Information Technology (Wuhan) Co.",
+      "rows": 1,
+      "initial_recommendation": "LIKELY_PRIVATE",
+      "reason": "一般有限公司形式（非集团）"
+    }
+  ],
+  "unclear": [
+    {
+      "cn_name": "郑州润祥机械设备",
+      "en_name": "ZHENGZHOU RUNXIANG MACHINERY EQUIPMENT",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "北京科兴中维",
+      "en_name": "SINOVAC LIFE SCIENCES CO., LTD.",
+      "rows": 4,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "指挥官生命值供应",
+      "en_name": "COMMANDER HEALTH SUPPLY",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "百事达企业",
+      "en_name": "BESTLUCK ENTERPRISE",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "95543",
+      "en_name": "95543",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "财团渴望",
+      "en_name": "CONSORCIOS LONGFOR",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "萨斯万德兹公司联合体",
+      "en_name": "ASOCIACION ACCIDENTAL S&Z",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "香港世界贸易中心协会",
+      "en_name": "HONG KONG WORLDTRADE CENTERS ASSOC",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "特变电工山东鲁能泰斯",
+      "en_name": "TBEA SHANDONG LUNENG TAIS",
+      "rows": 3,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "泰兴凤玲音乐剧",
+      "en_name": "TAIXING FENGLING MUSICAL",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "第一地铁线公司",
+      "en_name": "METRO LINEA 1 S.A.S",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    },
+    {
+      "cn_name": "安全定制",
+      "en_name": "Safety Custom",
+      "rows": 1,
+      "initial_recommendation": "UNKNOWN",
+      "reason": ""
+    }
+  ]
+}
