@@ -20,16 +20,14 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "VINNO TECHNOLOGY CO.": {
-    "name_zh": "VINNO TECHNOLOGY Co.",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "飞依诺科技有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "INFITEK CO LTD": {
-    "name_zh": "INFITEK CO LTD",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "英菲泰克有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "ZHENGZHOU RUNXIANG MACHINERY EQUIPMENT": {
     "name_zh": "郑州润祥机械设备",
@@ -93,28 +91,24 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "INTCO MEDICAL (HK) CO.": {
-    "name_zh": "INTCO MEDICAL (HK) CO.",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "英科医疗（香港）有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "): SHANGHAI TO-ALL FOREIGN TRADING CO": {
-    "name_zh": "） ： SHANGHAI TO-ALL FOREIGN TRAD",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "): 上海通全对外贸易有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "BESTLUCK ENTERPRISE": {
-    "name_zh": "BESTLUCK ENTERPRISE",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "百事达企业",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "CHISON MEDICAL TECHNOLOGIES CO": {
-    "name_zh": "CHISON MEDICAL TECHNOL",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "中山医疗科技有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "Jagui S.A.C.; Weihai Construction Group Co., Ltd.": {
     "name_zh": "Jagui S.A.C. ；威海建设集团有限公司",
@@ -165,10 +159,9 @@
     "soe": 0
   },
   "MR INVESTMENTS (HK) LIMITED": {
-    "name_zh": "MR INVESTMENTS (HK) LIM",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "先生投资（香港）有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "JIANGSU GEOLOGY & ENGINEERING CO. LTD": {
     "name_zh": "江苏地质工程有限公司",
@@ -176,16 +169,14 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "NARI GROUP CORP.": {
-    "name_zh": "NARI GROUP CORP.",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "南瑞集团有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "NARI GROUP CORPORATION": {
-    "name_zh": "NARI GROUP CORP",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "南瑞集团公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "SHENZEN MINDRAY BIO-MEDICAL ELECTRONIC": {
     "name_zh": "深圳迈瑞生物医用电子",
@@ -214,34 +205,29 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "HOLLEY CROPU CO. LTD": {
-    "name_zh": "HOLLEY CROPU CO. LTD",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "华立作物有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "ST. FRANCIS MEDICAL; GEBRUDER MARTIN GMBH & CO. KG; HEINE": {
-    "name_zh": "ST. FRANCIS MEDICAL; GEBRUDER MARTIN GMBH & Co. KG; HEINE",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "英石。弗朗西斯医疗；吉布德马丁有限公司；海涅",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "HOLLEY GROUP CO. LTD.": {
-    "name_zh": "HOLLEY GROUP Co. Ltd.",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "华立集团有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "ARGON; ST. FRANCIS MEDICAL": {
-    "name_zh": "ARGON ； St. FRANCIS MEDICAL",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "氩气；英石。方济各医疗",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "TIANJIN YORKOOL INT TRADI": {
-    "name_zh": "TIANJIN YORKOOL INT TRADI",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "天津优固国际贸易有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "BGI HEALTH (HK) CO. LTD": {
     "name_zh": "华大健康（香港）有限公司",
@@ -254,10 +240,9 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "SINO SOAR HYBRID TECH CO": {
-    "name_zh": "SINO SOAR HYBRID TECH CO",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "中翔混合动力科技有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "SHENZHEN SDG INFORMATION CO., LTD.": {
     "name_zh": "深圳市特发信息股份有限公司",
@@ -310,10 +295,9 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "NUCTECH COMPANY LIMITED": {
-    "name_zh": "NUCTECH COMPANY LIMITED",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "同方威视股份有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "PINGGAO GROUP INTERNATIONAL ENGINEERING CO. LTD.": {
     "name_zh": "平高集团国际工程有限公司",
@@ -331,10 +315,9 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "CONSORCIOS LONGFOR": {
-    "name_zh": "CONSORCIOS LONGFOR",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "财团渴望",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "Joint Venture: China Road and Bridge Corporation & Kuldipsingh Infra NV": {
     "name_zh": "合资公司：中国路桥股份有限公司& Kuldipsingh Infra NV",
@@ -342,10 +325,9 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "PCI-SINOPHARMINTL CONSORT": {
-    "name_zh": "PCI-SINOPHARMINTL CONSORT",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "PCI-国药联合体",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "Joint Venture of SUMEC Complete Equipment & Engineering Co. Ltd and XJ Group Corporation": {
     "name_zh": "苏梅克成套设备工程有限公司与XJ集团股份有限公司合资",
@@ -394,16 +376,14 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "WAVTEQ LIMITED": {
-    "name_zh": "WAVTEQ LIMITED",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "沃泰克有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "CHINANAT.ELEC W&CIMP/EXP": {
-    "name_zh": "CHINANAT.ELEC W&CIMP/EXP",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "中国国际电力展览会&CIMP/EXP",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "HONG KONG WORLDTRADE CENTERS ASSOC": {
     "name_zh": "香港世界贸易中心协会",
@@ -411,22 +391,19 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "JIANGZU ZHONGTIAN TEC CO": {
-    "name_zh": "JIANGZU ZHONGTIAN TEC CO",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "江祖中天科技有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "PEOPLES CABLE GROUP CO LT": {
-    "name_zh": "PEOPLE CABLE GROUP CO LT",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "人民电缆集团有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "INFOCIVITAS LIMITED": {
-    "name_zh": "INFOCIVITAS LIMITED",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "信息有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "TBEA SHANDONG LUNENG TAIS": {
     "name_zh": "特变电工山东鲁能泰斯",
@@ -494,10 +471,9 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "CHINA MACHINERY ENGINEERI": {
-    "name_zh": "CHINA MACHINERY ENGINEERI",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "中国机械工程",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "XIAN ELECTRIC ENGINEERING": {
     "name_zh": "西安电气工程",
@@ -505,22 +481,19 @@
     "ref": "https://api.mymemory.translated.net/get"
   },
   "SINOHYDRO CORPORATION LIM": {
-    "name_zh": "SINOHYDRO CORPORATION LIM",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "中国水利水电建设有限公司",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "METRO LINEA 1 S.A.S": {
-    "name_zh": "METRO LINEA 1 S.A.S",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
+    "name_zh": "地铁 LINEA 1 S.A.S",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "DONGFANG ELECTRIC": {
-    "name_zh": "Dongfang Electric",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
+    "name_zh": "东方电气",
+    "source": "machine_translated:google",
+    "ref": ""
   },
   "Safety Custom": {
     "name_zh": "安全定制",
