@@ -4,11 +4,6 @@
     "source": "machine_translated:mymemory",
     "ref": "https://api.mymemory.translated.net/get"
   },
-  "POWERCHINA JIANGXI ELECTRIC POWER CONSTRUCTION COMPANY LIMITED": {
-    "name_zh": "POWERCHINA江西省电力建设有限公司",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get"
-  },
   "ZHENJIANG NO.2 CONSTRUCTION ENGINEERING CO. LTD": {
     "name_zh": "镇江市第二建筑工程有限公司",
     "source": "machine_translated:mymemory",
@@ -39,17 +34,6 @@
     "source": "machine_translated:mymemory",
     "ref": "https://api.mymemory.translated.net/get"
   },
-  "CIMC-TIANDA NETHERLANDS COOPERATIEF U.A. (NETHERLANDS); SHENZHEN CIMC-TIANDA AIRPORT SUPPORT LTD.": {
-    "name_zh": "CIMC-TIANDA NETHERLAND COOPERATIEF U.A. （荷兰） ；深圳市CIMC-TIANDA机场支持有限公司",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 0
-  },
-  "SINOPHARM FORTUNE INTERNATIONAL TRADING CORP": {
-    "name_zh": "国药FORTUNE INTERNATIONAL TRADING CO",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get"
-  },
   "SINOVAC LIFE SCIENCES CO., LTD.": {
     "name_zh": "北京科兴中维",
     "source": "machine_translated:mymemory",
@@ -72,11 +56,6 @@
   },
   "COMMANDER HEALTH SUPPLY": {
     "name_zh": "指挥官生命值供应",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get"
-  },
-  "China MEHECO Corporation": {
-    "name_zh": "中国MEHECO公司",
     "source": "machine_translated:mymemory",
     "ref": "https://api.mymemory.translated.net/get"
   },
@@ -109,12 +88,6 @@
     "name_zh": "中山医疗科技有限公司",
     "source": "machine_translated:google",
     "ref": ""
-  },
-  "Jagui S.A.C.; Weihai Construction Group Co., Ltd.": {
-    "name_zh": "Jagui S.A.C. ；威海建设集团有限公司",
-    "source": "machine_translated:mymemory",
-    "ref": "https://api.mymemory.translated.net/get",
-    "soe": 1
   },
   "SHENZHEN MINDRAY BIO-MEDICAL ELECTRONIC CO.": {
     "name_zh": "深圳市迈瑞生物医药电子有限公司",
@@ -515,5 +488,30 @@
     "source": "machine_translated:mymemory",
     "ref": "https://api.mymemory.translated.net/get",
     "soe": 0
+  },
+  "POWERCHINA JIANGXI ELECTRIC POWER CONSTRUCTION COMPANY LIMITED": {
+    "name_zh": "POWERCHINA江西省电力建设有限公司",
+    "source": "machine_translated:mymemory",
+    "ref": "https://api.mymemory.translated.net/get"
+  },
+  "CIMC-TIANDA NETHERLANDS COOPERATIEF U.A. (NETHERLANDS); SHENZHEN CIMC-TIANDA AIRPORT SUPPORT LTD.": {
+    "name_zh": "CIMC-TIANDA NETHERLAND COOPERATIEF U.A. （荷兰） ；深圳市CIMC-TIANDA机场支持有限公司",
+    "source": "machine_translated:mymemory",
+    "ref": "https://api.mymemory.translated.net/get"
+  },
+  "SINOPHARM FORTUNE INTERNATIONAL TRADING CORP": {
+    "name_zh": "国药FORTUNE INTERNATIONAL TRADING CO",
+    "source": "machine_translated:mymemory",
+    "ref": "https://api.mymemory.translated.net/get"
+  },
+  "China MEHECO Corporation": {
+    "name_zh": "中国MEHECO公司",
+    "source": "machine_translated:mymemory",
+    "ref": "https://api.mymemory.translated.net/get"
+  },
+  "Jagui S.A.C.; Weihai Construction Group Co., Ltd.": {
+    "name_zh": "Jagui S.A.C. ；威海建设集团有限公司",
+    "source": "machine_translated:mymemory",
+    "ref": "https://api.mymemory.translated.net/get"
   }
 }
