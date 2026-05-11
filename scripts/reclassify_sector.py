@@ -15,7 +15,7 @@ CATEGORY_LABELS = {
     "education": "Education",
     "health": "Health",
     "industry": "Industry, Trade & Finance",
-    "agri": "Agriculture & Rural Dev.",
+    "agri": "Agriculture",
     "digital": "Digital Economy & ICT",
     "public": "Public Admin & Governance",
 }
