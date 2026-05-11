@@ -48,7 +48,7 @@ def map_idb_to_wb(idb_df, wb_cols):
         'project_type': 'operation_type_name',
         # Use IDB's `total_amount` as the WB `contract_value_usd` per user request
         'contract_value_usd': 'total_amount',
-        'contract_amount': 'idb_amount',
+        'contract_amount': None,  # Do not use idb_amount; contract_amount stays empty for IDB rows
         'winning_firm_name': 'awarded_firm_name',
         'winning_firm_country': 'awarded_firm_country_name',
         'winning_firm_code': 'awarded_firm_country_code',
