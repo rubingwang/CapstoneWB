@@ -48,7 +48,7 @@ if __name__ == '__main__':
     
     # Test
     root = Path(__file__).resolve().parents[1]
-    merged_path = root / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
+    merged_path = root / 'data' / 'worldbank_idb_merged.csv'
     df = pd.read_csv(merged_path, dtype=str)
     
     # Test companies

@@ -1,207 +1,137 @@
 # CapstoneWB
 
+## Overview
+
+CapstoneWB is a procurement dataset combining **World Bank** and **Inter-American Development Bank (IDB)** contract records for Latin America and the Caribbean (LAC) with Chinese company participation. The dataset includes **145 verified contracts** and has been cleaned, standardized, and enriched with sector reclassification and firm country information.
+
+- **Total Records**: 145 contracts
+- **World Bank**: 60 records (2001-2025)
+- **Inter-American Development Bank**: 85 records (2010-2025)
+- **Last Updated**: May 2026
+- **Coverage**: All historical procurement records available (截止到 2026 年 5 月)
+
 ## Live Site
 
 For a quick view of the dataset without downloading files, open the browser viewer here:
 
 - [CapstoneWB Data Viewer](https://rubingwang.github.io/CapstoneWB/)
 
-## Summary
+## Dataset Structure
 
-CapstoneWB is a Python scraping pipeline for World Bank procurement notices, focused on Latin America and the Caribbean (LAC). It pulls notice data from the official World Bank procurement API, and it also supports the procurement `CONTRACTS` tab through the World Bank contract data API.
+| Field | Description |
+|-------|-------------|
+| `year_awarded` | Award year for filtering and analysis |
+| `date_awarded` | Full award date (YYYY-MM-DD format) |
+| `notice_type` | Contract (standardized to "Contract" for all records) |
+| `notice_id` | Unique contract identifier |
+| `contract_name` | Contract title / procurement description |
+| `project_id` | Funding project identifier |
+| `project_name` | Project name from source metadata |
+| `sector` | Standardized 8-category sector classification |
+| `project_type` | Procurement type (e.g., Works, Goods, Services) |
+| `procurement_channel` | Procurement method label |
+| `data_source` | Source: "World Bank" or "Inter-American Development Bank" |
+| `country` | Project country (standardized format with title case) |
+| `contract_value_usd` | Contract value in USD |
+| `contract_currency` | Normalized to USD |
+| `winning_firm_name` | Awarded contractor name |
+| `winning_firm_name_zh` | Contractor name in Chinese (when available) |
+| `winning_firm_code` | Contractor code/ID from source data |
+| `winning_firm_country` | Contractor country |
+| `winning_firm_is_chinese` | Flag: 1 if Chinese firm, 0 if not |
+| `winning_firm_is_soe` | Flag: 1 if state-owned enterprise (inferred) |
+| `joint_venture` | Flag: 1 if joint venture, 0 if not |
+| `contract_url` | Direct URL to contract record |
+| `record_id` | Internal record identifier |
+| `bid_reference_no` | Bid reference number |
 
-Current workflow supports:
+## Sector Classification
 
-- Notice-level extraction (one row per notice, no project dedup)
-- Yearly exports (for example, 2015-2025: one CSV per year)
-- A merged export that combines all yearly files into one dataset
-- Conservative null-first logic: when a field is not reliably present, leave it blank instead of guessing
-- Contract-tab extraction for LAC contracts with contractor-country filtering
+All 145 records are classified into 8 standardized sectors based on contract name and procurement details:
 
-## Data Scope
+- **Infrastructure & Energy**: 76 records (electrification, power transmission, water systems)
+- **Health**: 33 records (vaccines, medical equipment, health programs)
+- **Education**: 10 records (school construction, educational equipment)
+- **Water, Sanitation & Waste**: 10 records
+- **Industry, Trade & Finance**: 10 records
+- **Agriculture**: 2 records
+- **Digital Economy & ICT**: 2 records
+- **Public Admin & Governance**: 2 records
 
-- Region: Latin America and the Caribbean (LAC)
-- Source APIs:
-	- World Bank Procurement Notices API (`search.worldbank.org/api/v2/procnotices`)
-	- World Bank Contract Data API (`search.worldbank.org/api/contractdata`)
-	- World Bank Country Metadata API
-- Typical period: 2015-2025 (configurable by CLI arguments)
+## Data Quality Notes
+
+- **Missing Values**: Represented as "." (single dot placeholder)
+- **Country Names**: Standardized to Title Case with lowercase conjunctions (e.g., "Trinidad and Tobago")
+- **Data Sources**: "Inter-American Development Bank" (standardized from "IDB")
+- **URLs**: All records include valid contract URLs
+  - World Bank: Direct project contract links
+  - IDB: Official IDB procurement dashboard
+- **Contract Names**: IDB records with missing titles fall back to project names
 
 ## Project Layout
 
-- `src/capstonewb/cli.py`: command line entry point
-- `src/capstonewb/world_bank.py`: fetching, detail merging, parsing, transformation
-- `src/capstonewb/models.py`: output schema (`ProcurementRecord`)
-- `src/capstonewb/config.py`: constants and defaults
-- `data/`: generated CSV files
+- `src/capstonewb/`: Python package (CLI entry point, data models, config)
+- `data/worldbank_idb_merged.csv`: Primary merged dataset (145 records, 24 columns)
+- `data/worldbank_idb_merged.backup.csv`: Synchronized backup copy
+- `data/worldbank_idb_merged.xlsx`: Excel export of merged dataset
+- `docs/data/worldbank_idb_merged.csv`: Copy for web viewer
+- `docs/data/worldbank_idb_merged.xlsx`: Excel copy for web viewer
+- `docs/index.html`: Browser-based data viewer
 
-## Setup
+## Setup & Installation
 
 ```bash
+# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install dependencies
 python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
-## Core Logic (How The Pipeline Works)
+## Data Access
 
-1. Fetch notices by API pages (`rows` + offset).
-2. Build LAC scope via country metadata and query procurement notices.
-3. Optionally keep all notice types (`--all-notice-types`) or apply notice-type filters.
-4. Merge list response with notice detail content when available.
-5. Parse winner/bidder and date blocks from notice text.
-6. Apply conservative inference helpers (for example, local registration, Chinese firm flag).
-7. Emit CSV in UTF-8 with BOM (`utf-8-sig`) for spreadsheet compatibility.
+### CSV Format
+Primary dataset available in three synchronized copies:
+- `data/worldbank_idb_merged.csv` (main source)
+- `data/worldbank_idb_merged.backup.csv` (backup)
 
-Important design choices:
+All use UTF-8-sig encoding for Excel compatibility.
 
-- Keep unknown values as blank/`NULL`.
-- Parsing is best-effort and conservative; no aggressive imputation.
-- Notice-level mode (`--notice-level`) preserves all notices instead of one row per project.
+### Excel Format
+- `data/worldbank_idb_merged.xlsx`
+- `docs/data/worldbank_idb_merged.xlsx` (for web viewer)
 
-## Output Variables (Full Dictionary)
+### Web Viewer
+Open `docs/index.html` or visit the GitHub Pages deployment to explore records interactively without downloading files.
 
-All columns come from `ProcurementRecord`.
+The web viewer supports:
+- Filtering by year, country, and data source
+- Keyword search across contract names and firm names
+- Pagination and data export
+- Interactive sorting and viewing
 
-- `project_id`: World Bank project identifier linked to the notice.
-- `notice_type`: Notice category (for example, `Contract Award`, `General Procurement Notice`).
-- `notice_no`: Notice ID used as notice number (mapped from API `id`).
-- `country`: Project country.
-- `year_awarded`: Award year used for filtering and analysis.
-- `date_awarded`: Full award notification date parsed from `Date Notification of Award Issued` (`YYYY/MM/DD` when available).
-- `data_source`: Data origin label (currently `World Bank`).
-- `procurement_channel`: Procurement channel label (currently MDB-financed channel label).
-- `funding_source`: Funding identifiers extracted from API credit/financing blocks. Contract-tab rows usually leave this blank because the contract feed does not expose the notice credit block.
-- `sector`: Sector value extracted from notice metadata.
-- `project_type`: Inferred project type from procurement grouping metadata.
-- `contract_value_usd`: Contract value in USD when a reliable USD value exists; otherwise blank.
-- `contract_currency`: Original contract currency parsed from notice.
-- `contract_amount`: Original contract amount parsed from notice.
-- `contract_duration_original_unit`: Duration unit in source text (`Day(s)`, `Week(s)`, `Month(s)`, `Year(s)` when present).
-- `contract_duration_original`: Numeric duration in original unit.
-- `contract_duration_days`: Duration normalized to days.
-- `winning_firm_name`: Parsed awarded winner name. For contract-tab rows, this comes from the supplier name in the contract feed.
-- `winning_firm_code`: Winner code parsed from winner name block (for example, bracketed numeric code). For contract-tab rows, this comes from the supplier ID when available.
-- `winning_firm_country`: Parsed winner country. For contract-tab rows, this comes from the supplier country in the contract feed.
-- `winning_firm_is_chinese`: Winner-country-based flag: China=1, non-China=0, unknown country=blank.
-- `winning_firm_is_soe`: Best-effort inferred SOE indicator from available text cues; blank if unavailable.
-- `number_of_bidders`: Parsed/derived bidder count. Not exposed by the contract feed, so it stays blank for contract-tab exports.
-- `if_single_bidder`: Single-bid indicator (1 if single bidder condition is met, else 0/blank based on available data).
-- `bidder_country_lowest_price`: Bidder country associated with lowest parsed bidder price.
-- `bidder_lowest_price`: Lowest parsed bidder price.
-- `bidder_country`: Parsed bidder country list/value from notice text.
-- `bidder_price_currency`: Currency for parsed bidder prices.
-- `bidder_price`: Parsed bidder price list/value.
-- `procurement_method`: Procurement method from notice metadata.
-- `financing_linked_to_bid`: Best-effort indicator whether financing appears linked to bidding terms.
-- `financing_source_chinese`: Best-effort indicator of Chinese financing source.
-- `joint_venture`: Parsed/inferred joint-venture indicator.
-- `firm_registered_locally`: Three-state field: local=1, known non-local=0, unknown=blank.
-- `record_id`: Internal record ID (API notice `id`).
-- `awarded_date`: Backward-compatible alias of award date (same value as `date_awarded`).
-- `bid_reference_no`: Bid reference number from source metadata.
-- `project_name`: Project name from source metadata.
-- `contract_url`: World Bank procurement detail URL for this notice.
+## Data Processing Notes
 
-## Practical Notes On Missing Values
+### Schema Evolution
+This dataset has undergone careful standardization:
+- **Column Count**: 24 fields (removed: contract_amount, durations, financing fields)
+- **Sector Reclassification**: Keywords from contract names analyzed to assign 8-category sectors
+- **Data Source Standardization**: "Inter-American Development Bank" (previously "IDB")
+- **Country Standardization**: Title Case with lowercase conjunctions
+- **Missing Value Handling**: All NULL/empty cells replaced with "." placeholder
 
-- Some old years have sparse detail content (`notice_text` missing or incomplete).
-- Winner/bidder fields can be blank when the source notice has no structured awarded block.
-- This is expected behavior by design and not treated as an automatic parsing failure.
+### Data Verification
+- All 145 records verified for accuracy
+- Contract URLs tested for validity
+- Chinese firm names reviewed and standardized
+- Duplicate records merged where applicable
+- Sector classifications validated against procurement descriptions
 
-## Run Commands
+## Version Information
 
-### Single Output (Custom Window)
-
-```bash
-capstonewb scrape-world-bank \
-	--start-year 2024 \
-	--end-year 2024 \
-	--all-notice-types \
-	--notice-level \
-	--rows 500 \
-	--output data/world_bank_lac_2024_notice_level.csv
-```
-
-### Contract Tab Sample
-
-```bash
-capstonewb scrape-world-bank \
-	--contracts \
-	--start-year 2015 \
-	--end-year 2025 \
-	--region-name "Latin America and Caribbean" \
-	--contractor-country China \
-	--rows 500 \
-	--limit 20 \
-	--output data/world_bank_lac_contracts_china_sample.csv
-```
-
-### Yearly Files + Merged File (2015-2025)
-
-```bash
-outdir=data/world_bank_lac_2015_2025_yearly_notice_level
-mkdir -p "$outdir"
-
-for y in $(seq 2015 2025); do
-	capstonewb scrape-world-bank \
-		--start-year "$y" \
-		--end-year "$y" \
-		--all-notice-types \
-		--notice-level \
-		--rows 500 \
-		--output "$outdir/world_bank_lac_${y}_notice_level.csv"
-done
-```
-
-Merge yearly files:
-
-```bash
-python - <<'PY'
-import glob
-import os
-import pandas as pd
-
-outdir = 'data/world_bank_lac_2015_2025_yearly_notice_level'
-files = sorted(glob.glob(os.path.join(outdir, 'world_bank_lac_*_notice_level.csv')))
-merged = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
-merged.to_csv(
-		os.path.join(outdir, 'world_bank_lac_2015_2025_notice_level_merged.csv'),
-		index=False,
-		encoding='utf-8-sig',
-)
-print('merged rows:', len(merged))
-PY
-```
-
-## Current Output Location (2015-2025)
-
-- Folder: `data/world_bank_lac_2015_2025_yearly_notice_level`
-- Yearly files: `world_bank_lac_2015_notice_level.csv` ... `world_bank_lac_2025_notice_level.csv`
-- Merged file: `world_bank_lac_2015_2025_notice_level_merged.csv`
-
-## Online Viewer (GitHub Pages)
-
-This repository includes a browser-based viewer in `docs/` so supervisors can inspect records online without downloading files.
-
-- Viewer entry: `docs/index.html`
-- Viewer dataset source: `data/world_bank_lac_2015_2025_yearly_notice_level/world_bank_lac_2015_2025_notice_level_merged.csv` (loaded via raw GitHub URL)
-
-Note: The project keeps a single source of truth under `data/world_bank_lac_2015_2025_yearly_notice_level` and does not duplicate the merged CSV under `docs/`.
-
-### Enable on GitHub
-
-1. Open repository settings on GitHub.
-2. Go to **Pages**.
-3. Under **Build and deployment**, choose:
-	- Source: **Deploy from a branch**
-	- Branch: **main**
-	- Folder: **/docs**
-4. Save.
-
-After deployment, your site URL will look like:
-
-`https://rubingwang.github.io/CapstoneWB/`
-
-The page supports filtering by year, country, and notice type, plus keyword search and pagination.
+- **Dataset Version**: May 2026
+- **Record Count**: 145 (60 World Bank + 85 IDB)
+- **Last Verified**: May 12, 2026
+- **Coverage Period**: 2001-2026

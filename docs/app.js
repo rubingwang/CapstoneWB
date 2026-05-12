@@ -1,9 +1,9 @@
 const DATA_SOURCES = {
   'wb_only': { label: 'World Bank Only', path: 'data/world_bank_lac_contracts_china_60.csv' },
-  'merged': { label: 'World Bank + IDB + AIDDATA + CDB (Merged)', path: 'data/worldbank_idb_aiddata_cdb_merged.csv' },
+  'merged': { label: 'World Bank + IDB (Merged, 20260512)', path: 'data/worldbank_idb_merged_20260512.csv' },
 };
 const DEFAULT_SOURCE = 'merged';
-const DATA_UPDATED_AT_MADRID = "2026-05-04 13:15:00 CEST";
+const DATA_UPDATED_AT_MADRID = "2026-05-12 14:37:12 CEST";
 const PAGE_SIZE = 50;
 
 const state = {

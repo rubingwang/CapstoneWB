@@ -7,7 +7,7 @@ Strategy:
 - Use cache first, then fallback to translation API
 
 Updates cache: data/firm_name_chinese_cache.json
-Updates merged CSV: data/worldbank_idb_aiddata_cdb_merged.csv
+Updates merged CSV: data/worldbank_idb_merged.csv
 """
 from pathlib import Path
 import pandas as pd
@@ -17,7 +17,7 @@ import time
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
+MERGED = ROOT / 'data' / 'worldbank_idb_merged.csv'
 CACHE = ROOT / 'data' / 'firm_name_chinese_cache.json'
 
 MYMEMORY_URL = 'https://api.mymemory.translated.net/get'

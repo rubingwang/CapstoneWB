@@ -221,7 +221,7 @@ def classify_sector(row: pd.Series) -> str:
 
 
 def main() -> None:
-    input_path = "data/worldbank_idb_aiddata_cdb_merged.csv"
+    input_path = "data/worldbank_idb_merged.csv"
     df = pd.read_csv(input_path, dtype=str)
 
     df["sector_reclassify"] = df.apply(classify_sector, axis=1)

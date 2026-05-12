@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
-"""Finalize the merged dataset column schema and export copies.
-
-This script applies the latest user-requested layout:
-- fill missing IDB contract_name values with project_name
-- set contract_currency to USD everywhere
-- drop unused contract duration / funding fields
-- rename notice_no -> notice_id
-- rename sector_reclassify -> sector_reclassifcation
-- reorder the leading columns while keeping the rest in original order
-"""
+"""Finalize the merged dataset schema and keep backup copies aligned."""
 
 from pathlib import Path
+import shutil
+import subprocess
 
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-TARGETS = [
-    ROOT / 'data' / 'worldbank_idb_merged.csv',
+SOURCE = ROOT / 'data' / 'worldbank_idb_merged.csv'
+BACKUPS = [
     ROOT / 'data' / 'worldbank_idb_merged.backup.csv',
 ]
 
@@ -45,6 +38,7 @@ LEADING_ORDER = [
     'procurement_channel',
 ]
 
+
 def load_df(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, dtype=str).replace({'nan': None})
 
@@ -56,6 +50,8 @@ def finalize_df(df: pd.DataFrame) -> pd.DataFrame:
         df = df.rename(columns={'notice_no': 'notice_id'})
     if 'sector_reclassify' in df.columns and 'sector_reclassifcation' not in df.columns:
         df = df.rename(columns={'sector_reclassify': 'sector_reclassifcation'})
+    if 'sector_reclassifcation' not in df.columns:
+        df['sector_reclassifcation'] = None
 
     if 'contract_name' not in df.columns:
         df['contract_name'] = None
@@ -66,10 +62,7 @@ def finalize_df(df: pd.DataFrame) -> pd.DataFrame:
         fill_mask = idb_mask & missing_contract_name
         df.loc[fill_mask, 'contract_name'] = df.loc[fill_mask, 'project_name']
 
-    if 'contract_currency' not in df.columns:
-        df['contract_currency'] = 'USD'
-    else:
-        df['contract_currency'] = 'USD'
+    df['contract_currency'] = 'USD'
 
     for col in DROP_COLUMNS:
         if col in df.columns:
@@ -77,29 +70,25 @@ def finalize_df(df: pd.DataFrame) -> pd.DataFrame:
 
     remaining_columns = [col for col in df.columns if col not in LEADING_ORDER]
     final_order = [col for col in LEADING_ORDER if col in df.columns] + remaining_columns
-
     return df[final_order]
 
 
 def main() -> None:
-    for target in TARGETS:
-        if not target.exists():
-            print(f'Skipping missing file: {target}')
-            continue
+    if not SOURCE.exists():
+        raise SystemExit(f'Source file not found: {SOURCE}')
 
-        df = load_df(target)
-        finalized = finalize_df(df)
-        finalized.to_csv(target, index=False, encoding='utf-8-sig')
-        print(f'Updated {target} ({len(finalized)} rows, {len(finalized.columns)} columns)')
+    df = load_df(SOURCE)
+    finalized = finalize_df(df)
+    finalized.to_csv(SOURCE, index=False, encoding='utf-8-sig')
+    print(f'Updated {SOURCE} ({len(finalized)} rows, {len(finalized.columns)} columns)')
 
-        if target.name == 'worldbank_idb_merged.csv':
-            try:
-                import subprocess
+    for target in BACKUPS:
+        if target.exists():
+            shutil.copy2(SOURCE, target)
+            print(f'Copied {SOURCE.name} -> {target.name}')
 
-                subprocess.run(['python3', 'scripts/save_both_formats.py', str(target)], check=False)
-                print('Exported CSV and Excel copies via save_both_formats.py')
-            except Exception as exc:
-                print('Failed to export copies:', exc)
+    subprocess.run(['python3', 'scripts/save_both_formats.py', str(SOURCE)], check=False)
+    print('Exported CSV and Excel copies via save_both_formats.py')
 
 
 if __name__ == '__main__':

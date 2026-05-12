@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 def main():
-    df = pd.read_csv('data/worldbank_idb_aiddata_cdb_merged.csv', dtype=str)
+    df = pd.read_csv('data/worldbank_idb_merged.csv', dtype=str)
     
     # 获取UNKNOWN的公司
     unknown_df = df[df['winning_firm_is_soe'].isna()]

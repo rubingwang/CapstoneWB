@@ -11,7 +11,7 @@ import pandas as pd
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
+MERGED = ROOT / 'data' / 'worldbank_idb_merged.csv'
 
 # EDIT THIS DICT with correct Chinese names based on your research
 # English name (as it appears in CSV) -> Chinese name

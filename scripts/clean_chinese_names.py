@@ -15,7 +15,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-MERGED = ROOT / 'data' / 'worldbank_idb_aiddata_cdb_merged.csv'
+MERGED = ROOT / 'data' / 'worldbank_idb_merged.csv'
 CACHE = ROOT / 'data' / 'firm_name_chinese_cache.json'
 REPORT = ROOT / 'reports' / 'firm_name_chinese_review.csv'
 

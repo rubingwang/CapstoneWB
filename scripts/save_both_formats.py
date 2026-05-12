@@ -4,7 +4,7 @@
 Usage:
   python3 scripts/save_both_formats.py path/to/file.csv
 
-If no path given, defaults to data/worldbank_idb_aiddata_cdb_merged.csv
+If no path given, defaults to data/worldbank_idb_merged.csv
 Also copies the outputs to docs/data/ with same filenames.
 """
 import sys
@@ -40,7 +40,7 @@ def save_both(csv_path: Path):
 
 
 def main():
-    p = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('data/worldbank_idb_aiddata_cdb_merged.csv')
+    p = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('data/worldbank_idb_merged.csv')
     save_both(p)
 
 

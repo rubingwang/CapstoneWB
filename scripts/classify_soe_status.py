@@ -84,7 +84,7 @@ def classify_soe(firm_name_zh):
 
 def main():
     # 读取数据
-    input_file = 'data/worldbank_idb_aiddata_cdb_merged.csv'
+    input_file = 'data/worldbank_idb_merged.csv'
     df = pd.read_csv(input_file, dtype=str)
     
     print(f"读取 {len(df)} 行数据")
