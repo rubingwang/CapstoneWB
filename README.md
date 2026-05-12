@@ -8,7 +8,7 @@ CapstoneWB is a procurement dataset combining **World Bank** and **Inter-America
 - **World Bank**: 60 records (2001-2025)
 - **Inter-American Development Bank**: 85 records (2010-2025)
 - **Last Updated**: May 2026
-- **Coverage**: All historical procurement records available (截止到 2026 年 5 月)
+- **Coverage**: All historical procurement records available (through May 2026)
 
 ## Live Site
 
