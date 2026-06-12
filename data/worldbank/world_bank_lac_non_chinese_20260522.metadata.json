@@ -1,0 +1,13 @@
+{
+  "source": "World Bank",
+  "region": "Latin America and Caribbean",
+  "start_year": 2015,
+  "end_year": 2026,
+  "total_records": 78622,
+  "non_chinese_records": 78545,
+  "removed_chinese_records": 77,
+  "non_chinese_contract_value_usd_sum": 40119039864.53999,
+  "output_csv": "/Users/rubing/VScodeProject/CapstoneWB/data/worldbank/world_bank_lac_non_chinese_20260522.csv",
+  "output_xlsx": "/Users/rubing/VScodeProject/CapstoneWB/data/worldbank/world_bank_lac_non_chinese_20260522.xlsx",
+  "unique_projects": 1240
+}

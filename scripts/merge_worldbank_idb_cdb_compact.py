@@ -87,6 +87,29 @@ BRICKES_COUNTRIES = {
     "South Africa",
 }
 
+REGION_COUNTRY_LABELS = {
+    "Andean Countries",
+    "Andean Community",
+    "Caribbean",
+    "Caribbean Region",
+    "Central America",
+    "Central American Sub-Region",
+    "Central American Subregion",
+    "Latin America",
+    "Latin America and Caribbean",
+    "Latin America and the Caribbean",
+    "Lac Region",
+    "Oecs Countries",
+    "OECS Countries",
+    "Oecs Sub-Region",
+    "Regional",
+    "Regional Support",
+    "Regional Cooperation",
+    "South America",
+    "Mercosur",
+    "ALBA",
+}
+
 
 def load_csv(path: Path) -> pd.DataFrame:
     dataframe = pd.read_csv(path, dtype=str)
@@ -209,14 +232,102 @@ def normalize_country_name(value: str | None) -> str | None:
         "People'S Republic Of China": "China",
         "St. Maarten (Dutch Part)": "St Maarten",
         "Sint Maarten (Dutch Part)": "St Maarten",
+        "Sint Maarten": "St Maarten",
+        # Saint -> St standardization
+        "Saint Kitts And Nevis": "St. Kitts and Nevis",
+        "Saint Lucia": "St. Lucia",
+        "Saint Vincent And The Grenadines": "St. Vincent and the Grenadines",
+        # Bahamas variations
+        "Bahamas, The": "The Bahamas",
+        "Bahamas": "The Bahamas",
+        # Venezuela - normalize to short form
+        "Venezuela": "Venezuela",
+        "Venezuela, Republica Bolivariana de": "Venezuela",
+        # Korea
+        "Korea, Republic Of": "Korea, Republic of",
+        "Rep. Of Korea": "Korea, Republic of",
+        # INTAL -> Latin American Integration Association
+        "Intal": None,
+        # CDB -> not a country
+        "Cdb": None,
+        # Panama Canal Zone -> not a country
+        "Panama Canal Zone": None,
+        "Panama Canal Zo": None,
+        # Stateless -> no country
+        "Stateless": None,
+        # World -> not a country
+        "World": None,
+        # Curacao standardization
+        "Curacao": "Curaçao",
+        # French Guiana
+        "French Guiana": "Guiana",
     }
     return post_fixes.get(normalized, normalized)
 
 
-def normalize_country_cell(value: str | None) -> str | None:
+def load_country_candidates(wb_df: pd.DataFrame, idb_df: pd.DataFrame, cdb_df: pd.DataFrame) -> list[str]:
+    """Build country candidate list from all three raw sources (WB, IDB, CDB)."""
+    candidates: list[str] = []
+    sources = [
+        (wb_df, "country"),
+        (idb_df, "operation_country_name"),
+        (cdb_df, "country"),
+    ]
+    for df, col in sources:
+        if col not in df.columns:
+            continue
+        for value in df[col].dropna().astype(str).tolist():
+            normalized = normalize_country_name(value)
+            if not normalized or normalized in REGION_COUNTRY_LABELS or normalized in GLOBAL_NORTH_COUNTRIES:
+                continue
+            if normalized not in candidates:
+                candidates.append(normalized)
+    return sorted(candidates, key=len, reverse=True)
+
+
+def infer_country_from_project_name(project_name: str | None, candidates: list[str]) -> str | None:
+    if not project_name:
+        return None
+    haystack = normalize_text(project_name)
+    if not haystack:
+        return None
+    lowered = haystack.lower()
+    for candidate in candidates:
+        needle = candidate.lower()
+        if needle and needle in lowered:
+            return candidate
+    return None
+
+
+def normalize_project_country(raw_country: str | None, project_name: str | None, candidates: list[str], *, prefer_project_name: bool = False) -> str | None:
+    raw_value = normalize_country_name(raw_country)
+    inferred_value = infer_country_from_project_name(project_name, candidates)
+
+    if raw_value in REGION_COUNTRY_LABELS:
+        return inferred_value
+
+    if raw_value in GLOBAL_NORTH_COUNTRIES and raw_value not in candidates:
+        return inferred_value
+
+    if prefer_project_name and inferred_value and inferred_value != raw_value:
+        return inferred_value
+
+    if raw_value in candidates:
+        return raw_value
+
+    return inferred_value
+
+
+def normalize_country_cell(value: str | None, *, candidates: list[str] | None = None) -> str | None:
+    """Normalize multi-country cell, optionally filtering to LAC countries."""
     values = split_multi_value(value)
     normalized = [normalize_country_name(item) for item in values]
-    normalized = [item for item in normalized if item]
+    normalized = [item for item in normalized if item and item not in REGION_COUNTRY_LABELS]
+    
+    # If candidates provided, filter to LAC countries only
+    if candidates is not None:
+        normalized = [item for item in normalized if item in candidates or item not in GLOBAL_NORTH_COUNTRIES]
+    
     normalized = dedupe_preserve_order(normalized)
     return "; ".join(normalized) if normalized else None
 
@@ -278,10 +389,11 @@ def selected_columns() -> list[str]:
     ]
 
 
-def map_world_bank(wb_df: pd.DataFrame) -> pd.DataFrame:
+def map_world_bank(wb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for _, row in wb_df.iterrows():
-        winning_country = normalize_country_cell(row.get("winning_firm_country"))
+        winning_country = normalize_country_cell(row.get("winning_firm_country"), candidates=country_candidates)
+        project_country = normalize_project_country(row.get("country"), row.get("project_name"), country_candidates)
         contract_name = normalize_text(row.get("project_name"))
         rows.append(
             {
@@ -297,7 +409,7 @@ def map_world_bank(wb_df: pd.DataFrame) -> pd.DataFrame:
                 "procurement_channel": row.get("procurement_channel"),
                 "data_source": row.get("data_source") or "World Bank",
                 "bid_reference_no": row.get("bid_reference_no"),
-                "country": normalize_country_name(row.get("country")),
+                "country": project_country,
                 "contract_value_usd": normalize_float(row.get("contract_value_usd")),
                 "winning_country": winning_country,
                 "winning_country_type": country_type(winning_country),
@@ -308,10 +420,23 @@ def map_world_bank(wb_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=selected_columns())
 
 
-def map_idb(idb_df: pd.DataFrame) -> pd.DataFrame:
+def map_idb(idb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for _, row in idb_df.iterrows():
-        winning_country = normalize_country_name(row.get("awarded_firm_country_name"))
+        winning_country_raw = normalize_country_name(row.get("awarded_firm_country_name"))
+        # Filter non-LAC countries from winning_country
+        if winning_country_raw and winning_country_raw in REGION_COUNTRY_LABELS:
+            winning_country = None
+        elif winning_country_raw and winning_country_raw in GLOBAL_NORTH_COUNTRIES and winning_country_raw not in country_candidates:
+            winning_country = None
+        else:
+            winning_country = winning_country_raw
+            
+        project_country = normalize_project_country(
+            row.get("operation_country_name"),
+            row.get("project_name"),
+            country_candidates,
+        )
         rows.append(
             {
                 "year_awarded": normalize_int(row.get("contract_year")),
@@ -326,7 +451,7 @@ def map_idb(idb_df: pd.DataFrame) -> pd.DataFrame:
                 "procurement_channel": row.get("procurement_type"),
                 "data_source": "IDB",
                 "bid_reference_no": None,
-                "country": normalize_country_name(row.get("operation_country_name")),
+                "country": project_country,
                 "contract_value_usd": normalize_float(row.get("total_amount")),
                 "winning_country": winning_country,
                 "winning_country_type": country_type(winning_country),
@@ -337,10 +462,16 @@ def map_idb(idb_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=selected_columns())
 
 
-def map_cdb(cdb_df: pd.DataFrame) -> pd.DataFrame:
+def map_cdb(cdb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     for _, row in cdb_df.iterrows():
-        winning_country = normalize_country_cell(row.get("winning_country"))
+        winning_country = normalize_country_cell(row.get("winning_country"), candidates=country_candidates)
+        project_country = normalize_project_country(
+            row.get("country"),
+            row.get("project_name"),
+            country_candidates,
+            prefer_project_name=True,
+        )
         rows.append(
             {
                 "year_awarded": normalize_int(row.get("award_year")),
@@ -355,7 +486,7 @@ def map_cdb(cdb_df: pd.DataFrame) -> pd.DataFrame:
                 "procurement_channel": row.get("procurement_type"),
                 "data_source": "CDB",
                 "bid_reference_no": None,
-                "country": normalize_country_name(row.get("country")),
+                "country": project_country,
                 "contract_value_usd": normalize_float(row.get("contract_value_usd")),
                 "winning_country": winning_country,
                 "winning_country_type": country_type(winning_country),
@@ -384,9 +515,10 @@ def main() -> None:
     wb_df = load_csv(WB_PATH)
     idb_df = load_csv(IDB_PATH)
     cdb_df = load_csv(CDB_PATH)
+    country_candidates = load_country_candidates(wb_df, idb_df, cdb_df)
 
     merged = pd.concat(
-        [map_world_bank(wb_df), map_idb(idb_df), map_cdb(cdb_df)],
+        [map_world_bank(wb_df, country_candidates), map_idb(idb_df, country_candidates), map_cdb(cdb_df, country_candidates)],
         ignore_index=True,
         sort=False,
     ).reindex(columns=selected_columns())
