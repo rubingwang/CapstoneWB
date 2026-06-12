@@ -3,7 +3,7 @@
   "region": "Latin America and Caribbean",
   "start_year": 2015,
   "end_year": 2026,
-  "total_records": 78926,
+  "total_records": 78950,
   "output_csv": "/Users/rubing/VScodeProject/CapstoneWB/data/raw/world_bank/world_bank_lac_raw.csv",
   "columns": [
     "project_id",
