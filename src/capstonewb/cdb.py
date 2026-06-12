@@ -15,6 +15,7 @@ from urllib.parse import urlencode, urljoin
 from urllib.request import Request, urlopen
 
 import pandas as pd
+import requests
 
 from .config import WORLD_BANK_COUNTRY_API
 
@@ -38,6 +39,7 @@ class CDBContractAward:
     winning_firm: str | None = None
     currency_unit: str | None = None
     contract_amount: float | None = None
+    contract_value_usd: float | None = None
     notice_url: str | None = None
     page_url: str | None = None
     data_source: str | None = "CDB"
@@ -196,6 +198,79 @@ def _parse_amount_and_currency(text: str) -> tuple[str | None, float | None, str
     return body or None, amount, currency
 
 
+def _normalize_currency_unit(value: str | None) -> str | None:
+    if not value:
+        return None
+
+    cleaned = _normalize_text(value).upper().replace(".", "")
+    cleaned = cleaned.replace("US$", "USD")
+    cleaned = cleaned.replace("EUROS", "EUR").replace("EURO", "EUR")
+    cleaned = cleaned.replace("BZE", "BZD")
+    cleaned = cleaned.replace("BDS", "BBD")
+    cleaned = cleaned.replace("EC$", "XCD").replace("EC", "XCD")
+
+    if cleaned in {"$", "USD$"}:
+        return "USD"
+    if cleaned.startswith("USD"):
+        return "USD"
+    if cleaned.startswith("EUR"):
+        return "EUR"
+    if cleaned.startswith("GBP"):
+        return "GBP"
+    if cleaned.startswith("CAD"):
+        return "CAD"
+    if cleaned.startswith("BZD"):
+        return "BZD"
+    if cleaned.startswith("BBD"):
+        return "BBD"
+    if cleaned.startswith("XCD"):
+        return "XCD"
+    if cleaned.startswith("JMD"):
+        return "JMD"
+    if cleaned.startswith("TTD"):
+        return "TTD"
+    if cleaned.startswith("GYD"):
+        return "GYD"
+    if cleaned.startswith("SRD"):
+        return "SRD"
+    if cleaned.startswith("BSD"):
+        return "BSD"
+    if cleaned.startswith("HTG"):
+        return "HTG"
+
+    return cleaned if len(cleaned) <= 5 else None
+
+
+@lru_cache(maxsize=None)
+def _year_end_usd_rate(year: int, currency_code: str) -> float | None:
+    currency_code = _normalize_currency_unit(currency_code)
+    if not currency_code:
+        return None
+    if currency_code == "USD":
+        return 1.0
+
+    url = f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{year}-12-31/v1/currencies/{currency_code.lower()}.json"
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        payload = response.json()
+        rate = payload[currency_code.lower()]["usd"]
+        return float(rate)
+    except Exception:
+        return None
+
+
+def _convert_to_usd(amount: float | None, year: int | None, currency_code: str | None) -> float | None:
+    if amount is None:
+        return None
+    if year is None:
+        return None
+    rate = _year_end_usd_rate(year, currency_code or "")
+    if rate is None:
+        return None
+    return round(float(amount) * rate, 2)
+
+
 def _split_country_and_firm(body: str, country_names: list[str]) -> tuple[str | None, str | None]:
     clean = _normalize_text(body)
     if not clean:
@@ -255,6 +330,7 @@ def fetch_cdb_contract_awards(years: list[int] | None = None) -> list[CDBContrac
                 winning_bid_raw = _normalize_text(re.sub(r"<[^>]+>", " ", row_cells[4])) or None
                 winning_country, winning_firm, currency_unit, contract_amount = _parse_winning_bid(winning_bid_raw, country_names)
                 year_sequence += 1
+                contract_value_usd = _convert_to_usd(contract_amount, year, currency_unit)
 
                 records.append(
                     CDBContractAward(
@@ -269,6 +345,7 @@ def fetch_cdb_contract_awards(years: list[int] | None = None) -> list[CDBContrac
                         winning_firm=winning_firm,
                         currency_unit=currency_unit,
                         contract_amount=contract_amount,
+                        contract_value_usd=contract_value_usd,
                         notice_url=urljoin(_CDB_BASE_URL, href) if href else None,
                         page_url=page_url,
                     )

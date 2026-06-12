@@ -17,6 +17,7 @@
     "winning_firm",
     "currency_unit",
     "contract_amount",
+    "contract_value_usd",
     "notice_url",
     "page_url",
     "data_source"
