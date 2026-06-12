@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -17,6 +17,10 @@ IDB_PATH = ROOT / "data" / "raw" / "idb" / "IDB_Project_Procurement_Awards_Datas
 CDB_PATH = ROOT / "data" / "raw" / "cdb" / "cdb_lac_raw.csv"
 OUT_DIR = ROOT / "data" / "merged_data"
 OUT_PATH = OUT_DIR / "worldbank_idb_cdb_merged.csv"
+
+
+def version_suffix() -> str:
+    return datetime.now().strftime("%m%d")
 
 
 COUNTRY_STOPWORDS = {
@@ -362,13 +366,18 @@ def map_cdb(cdb_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=selected_columns())
 
 
-def clean_output_dir() -> None:
+def write_outputs(dataframe: pd.DataFrame) -> tuple[Path, Path, Path, Path]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    for path in OUT_DIR.iterdir():
-        if path.is_file() or path.is_symlink():
-            path.unlink()
-        elif path.is_dir():
-            shutil.rmtree(path)
+    dated_suffix = version_suffix()
+    dated_csv = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.csv"
+    dated_xlsx = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.xlsx"
+    latest_xlsx = OUT_PATH.with_suffix(".xlsx")
+
+    dataframe.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
+    dataframe.to_csv(dated_csv, index=False, encoding="utf-8-sig")
+    dataframe.to_excel(latest_xlsx, index=False)
+    dataframe.to_excel(dated_xlsx, index=False)
+    return OUT_PATH, latest_xlsx, dated_csv, dated_xlsx
 
 
 def main() -> None:
@@ -382,11 +391,13 @@ def main() -> None:
         sort=False,
     ).reindex(columns=selected_columns())
 
-    clean_output_dir()
-    merged.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
+    latest_csv, latest_xlsx, dated_csv, dated_xlsx = write_outputs(merged)
 
     summary = {
-        "output_csv": str(OUT_PATH),
+        "output_csv": str(latest_csv),
+        "output_xlsx": str(latest_xlsx),
+        "versioned_csv": str(dated_csv),
+        "versioned_xlsx": str(dated_xlsx),
         "rows": int(len(merged)),
         "wb_rows": int(len(wb_df)),
         "idb_rows": int(len(idb_df)),
