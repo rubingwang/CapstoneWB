@@ -1,0 +1,24 @@
+{
+  "source": "CDB",
+  "region": "Latin America and the Caribbean",
+  "start_year": 2012,
+  "end_year": 2026,
+  "total_records": 429,
+  "output_csv": "data/raw/cdb/cdb_lac_raw.csv",
+  "columns": [
+    "award_year",
+    "notice_id",
+    "project_name",
+    "sector",
+    "country",
+    "procurement_type",
+    "winning_bid_raw",
+    "winning_country",
+    "winning_firm",
+    "currency_unit",
+    "contract_amount",
+    "notice_url",
+    "page_url",
+    "data_source"
+  ]
+}
