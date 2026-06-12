@@ -252,51 +252,53 @@ def _parse_party_rows(section_text: str | None) -> list[tuple[str | None, str | 
     return parsed
 
 
-def _parse_award_party_info(notice_text: str | None) -> tuple[str | None, str | None]:
+def _dedupe_preserve_order(values: Iterable[str | None]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        cleaned = _normalize_text(value) if value else None
+        if not cleaned:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(cleaned)
+    return deduped
+
+
+def _parse_award_party_values(notice_text: str | None) -> tuple[list[str], list[str]]:
     section = _extract_award_section(notice_text)
     if not section:
-        return None, None
+        return [], []
 
     rows = _parse_party_rows(section)
-    if rows:
-        first_name, first_country = rows[0]
-        return first_name, first_country
+    if not rows:
+        matches = re.findall(
+            r"<b>\s*([^<]+?)\s*(?:\(\d+\))?\s*</b>(?:(?!<b>).){0,500}?Country:\s*([^<\r\n<]+)",
+            section,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        rows = [(_normalize_text(raw_name), _normalize_text(raw_country)) for raw_name, raw_country in matches if _normalize_text(raw_name)]
 
-    matches = re.findall(
-        r"<b>\s*([^<]+?)\s*(?:\(\d+\))?\s*</b>(?:(?!<b>).){0,500}?Country:\s*([^<\r\n<]+)",
-        section,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    if not matches:
-        return None, None
+    names = _dedupe_preserve_order(name for name, _ in rows)
+    countries = _dedupe_preserve_order(country for _, country in rows)
+    return names, countries
 
-    filtered: list[tuple[str, str]] = []
-    for raw_name, raw_country in matches:
-        name = _normalize_text(raw_name)
-        country = _normalize_text(raw_country)
-        if not name:
-            continue
-        if "beneficial ownership" in name.lower():
-            continue
-        filtered.append((name, country))
 
-    if not filtered:
-        return None, None
-
-    first_name, first_country = filtered[0]
-    return first_name, first_country
+def _parse_award_party_info(notice_text: str | None) -> tuple[str | None, str | None]:
+    names, countries = _parse_award_party_values(notice_text)
+    return ("; ".join(names) or None, "; ".join(countries) or None)
 
 
 def _parse_winning_firm_name(notice_text: str | None) -> str | None:
-    names, _ = _parse_award_party_info(notice_text)
-    values = _split_semicolon_values(names)
-    return values[0] if values else None
+    names, _ = _parse_award_party_values(notice_text)
+    return "; ".join(names) if names else None
 
 
 def _parse_winning_firm_country(notice_text: str | None) -> str | None:
-    _, countries = _parse_award_party_info(notice_text)
-    values = _split_semicolon_values(countries)
-    return values[0] if values else None
+    _, countries = _parse_award_party_values(notice_text)
+    return "; ".join(countries) if countries else None
 
 
 def _parse_winning_firm_code(notice_text: str | None) -> str | None:
@@ -322,7 +324,7 @@ def _parse_winning_firm_code(notice_text: str | None) -> str | None:
 def _parse_bidder_country(notice_text: str | None) -> str | None:
     section = _extract_evaluated_section(notice_text)
     rows = _parse_party_rows(section)
-    countries = [country for _, country in rows if country]
+    countries = _dedupe_preserve_order([country for _, country in rows if country])
     return "; ".join(countries) or None
 
 
@@ -963,6 +965,9 @@ def _parse_joint_venture(notice_text: str | None) -> int | None:
         return None
     lower = notice_text.lower()
     if "joint venture" in lower or "consortium" in lower:
+        return 1
+    section = _extract_award_section(notice_text)
+    if section and len(_parse_party_rows(section)) > 1:
         return 1
     return None
 
