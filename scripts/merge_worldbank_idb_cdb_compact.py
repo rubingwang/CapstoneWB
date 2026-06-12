@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from capstonewb.world_bank import get_lac_countries
+
 
 ROOT = Path(__file__).resolve().parents[1]
 WB_PATH = ROOT / "data" / "raw" / "world_bank" / "world_bank_lac_raw.csv"
@@ -225,44 +227,68 @@ def normalize_country_name(value: str | None) -> str | None:
     normalized = normalized.replace("  ", " ")
 
     post_fixes = {
-        "Republic Of Suriname": "Suriname",
-        "Republic Of Haiti": "Haiti",
-        "Republic Of Trinidad And Tobago": "Trinidad and Tobago",
-        "United States Of America": "United States",
-        "People'S Republic Of China": "China",
-        "St. Maarten (Dutch Part)": "St Maarten",
-        "Sint Maarten (Dutch Part)": "St Maarten",
-        "Sint Maarten": "St Maarten",
+        "republic of suriname": "Suriname",
+        "republic of haiti": "Haiti",
+        "republic of trinidad and tobago": "Trinidad and Tobago",
+        "united states of america": "United States",
+        "people's republic of china": "China",
+        "st. maarten (dutch part)": "St Maarten",
+        "sint maarten (dutch part)": "St Maarten",
+        "sint maarten": "St Maarten",
         # Saint -> St standardization
-        "Saint Kitts And Nevis": "St. Kitts and Nevis",
-        "Saint Lucia": "St. Lucia",
-        "Saint Vincent And The Grenadines": "St. Vincent and the Grenadines",
+        "saint kitts and nevis": "St. Kitts and Nevis",
+        "saint lucia": "St. Lucia",
+        "saint vincent and the grenadines": "St. Vincent and the Grenadines",
         # Bahamas variations
-        "Bahamas, The": "The Bahamas",
-        "Bahamas": "The Bahamas",
+        "bahamas, the": "The Bahamas",
+        "bahamas, the ": "The Bahamas",
+        "bahamas": "The Bahamas",
         # Venezuela - normalize to short form
-        "Venezuela": "Venezuela",
-        "Venezuela, Republica Bolivariana de": "Venezuela",
+        "venezuela": "Venezuela",
+        "venezuela, republica bolivariana de": "Venezuela",
+        "venezuela, rb": "Venezuela",
         # Korea
-        "Korea, Republic Of": "Korea, Republic of",
-        "Rep. Of Korea": "Korea, Republic of",
+        "korea, republic of": "Korea, Republic of",
+        "rep. of korea": "Korea, Republic of",
         # INTAL -> Latin American Integration Association
-        "Intal": None,
+        "intal": None,
         # CDB -> not a country
-        "Cdb": None,
+        "cdb": None,
         # Panama Canal Zone -> not a country
-        "Panama Canal Zone": None,
-        "Panama Canal Zo": None,
+        "panama canal zone": None,
+        "panama canal zo": None,
         # Stateless -> no country
-        "Stateless": None,
+        "stateless": None,
         # World -> not a country
-        "World": None,
+        "world": None,
         # Curacao standardization
-        "Curacao": "Curaçao",
+        "curacao": "Curaçao",
         # French Guiana
-        "French Guiana": "Guiana",
+        "french guiana": "Guiana",
+        # World Bank LAC API aliases
+        "puerto rico (us)": "Puerto Rico",
+        "virgin islands (u.s.)": "United States Virgin Islands",
+        "virgin islands (us)": "United States Virgin Islands",
+        "st. martin (french part)": "St. Martin",
+        "sint maarten (dutch part)": "St Maarten",
     }
-    return post_fixes.get(normalized, normalized)
+    return post_fixes.get(normalized.lower(), normalized)
+
+
+def load_lac_country_names() -> set[str]:
+    countries = set()
+    for value in get_lac_countries():
+        normalized = normalize_country_name(value)
+        if normalized:
+            countries.add(normalized)
+    return countries
+
+
+def filter_to_lac_country(value: str | None, lac_country_names: set[str]) -> str | None:
+    normalized = normalize_country_name(value)
+    if normalized and normalized in lac_country_names:
+        return normalized
+    return None
 
 
 def load_country_candidates(wb_df: pd.DataFrame, idb_df: pd.DataFrame, cdb_df: pd.DataFrame) -> list[str]:
@@ -516,12 +542,15 @@ def main() -> None:
     idb_df = load_csv(IDB_PATH)
     cdb_df = load_csv(CDB_PATH)
     country_candidates = load_country_candidates(wb_df, idb_df, cdb_df)
+    lac_country_names = load_lac_country_names()
 
     merged = pd.concat(
         [map_world_bank(wb_df, country_candidates), map_idb(idb_df, country_candidates), map_cdb(cdb_df, country_candidates)],
         ignore_index=True,
         sort=False,
     ).reindex(columns=selected_columns())
+
+    merged["country"] = merged["country"].apply(lambda value: filter_to_lac_country(value, lac_country_names))
 
     latest_csv, latest_xlsx, dated_csv, dated_xlsx = write_outputs(merged)
 
