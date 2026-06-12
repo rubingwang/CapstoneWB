@@ -503,6 +503,19 @@ def _extract_contract_supplier_country(contract: dict[str, Any]) -> str | None:
     return _join_values(_split_multi_value(contract.get("supplier_countryshortname")))
 
 
+def _extract_contract_country(contract: dict[str, Any]) -> str | None:
+    supplier_countries = _split_multi_value(contract.get("supplier_countryshortname"))
+    if supplier_countries:
+        return supplier_countries[0]
+
+    country = contract.get("countryshortname")
+    if country:
+        text = _normalize_text(str(country))
+        if text:
+            return text
+    return None
+
+
 def _extract_contract_supplier_name(contract: dict[str, Any]) -> str | None:
     return _join_values(_split_multi_value(contract.get("supp_name")))
 
@@ -817,6 +830,7 @@ def _to_record(notice: dict[str, Any]) -> ProcurementRecord:
 
 def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
     signing_date, year_awarded = _parse_contract_signing_date(contract.get("contr_sgn_date"))
+    contract_country = _extract_contract_country(contract)
     supplier_country = _extract_contract_supplier_country(contract)
     supplier_name = _extract_contract_supplier_name(contract)
     supplier_code = _extract_contract_supplier_code(contract)
@@ -825,7 +839,7 @@ def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
         project_id=contract.get("projectid"),
         notice_type="Contract",
         notice_no=contract.get("id"),
-        country=contract.get("countryshortname"),
+        country=contract_country,
         year_awarded=year_awarded,
         date_awarded=signing_date,
         data_source="World Bank",
@@ -855,7 +869,7 @@ def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
         financing_linked_to_bid=None,
         financing_source_chinese=None,
         joint_venture=None,
-        firm_registered_locally=_derive_firm_registered_locally(supplier_country, contract.get("countryshortname")),
+        firm_registered_locally=_derive_firm_registered_locally(supplier_country, contract_country),
         record_id=contract.get("id"),
         awarded_date=signing_date,
         bid_reference_no=contract.get("contr_refnum"),
