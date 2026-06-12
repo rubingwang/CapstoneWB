@@ -148,7 +148,7 @@ The merged dataset combines **World Bank (WB) procurement contracts** with **Int
 
 - **Main merged dataset**: `data/worldbank_idb_aiddata_cdb_merged.csv`
 - **World Bank only**: `data/worldbank/world_bank_lac_contracts_china_60.csv`
-- **IDB data**: `data/idb/IDB_Project_Procurement_Awards_Dataset.csv`
+- **IDB data**: `data/raw/idb/IDB_Project_Procurement_Awards_Dataset0612.csv`
 - **Cache (Chinese lookups)**: `data/firm_name_chinese_cache.json`
 - **Review report**: `reports/firm_name_chinese_review.csv`
 - **Merge script**: `scripts/merge_worldbank_idb.py`

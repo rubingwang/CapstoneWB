@@ -12,7 +12,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 WB_PATH = ROOT / "data" / "raw" / "world_bank" / "world_bank_lac_raw.csv"
-IDB_PATH = ROOT / "data" / "idb" / "IDB_Project_Procurement_Awards_Dataset.csv"
+IDB_PATH = ROOT / "data" / "raw" / "idb" / "IDB_Project_Procurement_Awards_Dataset0612.csv"
 CDB_PATH = ROOT / "data" / "raw" / "cdb" / "cdb_lac_raw.csv"
 OUT_DIR = ROOT / "data" / "merged_data"
 OUT_PATH = OUT_DIR / "worldbank_idb_cdb_merged.csv"
