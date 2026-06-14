@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import html as html_module
 import json
 import re
 import time
+from functools import lru_cache
 from datetime import datetime
 from typing import Any, Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -23,6 +25,7 @@ _USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X) CapstoneWB/0.1"
 _DETAIL_WORKERS = 8
 _PROCUREMENT_DETAIL_BASE_URL = "https://projects.worldbank.org/en/projects-operations/procurement-detail"
 _CONTRACT_OVERVIEW_BASE_URL = "https://projects.worldbank.org/en/projects-operations/contractoverview"
+_PROJECT_DETAIL_WORKERS = 16
 
 
 def _json_get(url: str) -> Any:
@@ -43,6 +46,210 @@ def _json_get_with_retry(url: str, attempts: int = 3, delay_seconds: float = 1.0
     if last_error is not None:
         raise last_error
     raise RuntimeError("Failed to fetch JSON payload")
+
+
+def _normalize_key(value: str | None) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (value or "").lower())
+
+
+def _coerce_text_value(value: Any) -> str | None:
+    if value in (None, ""):
+        return None
+    if isinstance(value, list):
+        parts = [_coerce_text_value(item) for item in value]
+        parts = [item for item in parts if item]
+        return "; ".join(parts) or None
+    if isinstance(value, dict):
+        return None
+    text = _normalize_text(str(value))
+    return text or None
+
+
+def _unwrap_record_payload(payload: Any, project_id: str | None = None) -> dict[str, Any]:
+    normalized_project_id = _normalize_text(project_id).upper() if project_id else None
+
+    def _pick_from_mapping(mapping: dict[str, Any]) -> dict[str, Any] | None:
+        if normalized_project_id and normalized_project_id in mapping and isinstance(mapping[normalized_project_id], dict):
+            return mapping[normalized_project_id]
+        for key, value in mapping.items():
+            if isinstance(value, dict):
+                key_match = _normalize_text(str(key)).upper() == normalized_project_id if normalized_project_id else False
+                id_match = _normalize_text(str(value.get("id") or value.get("projectid") or "")).upper() == normalized_project_id if normalized_project_id else False
+                if key_match or id_match:
+                    return value
+        if len(mapping) == 1:
+            only_value = next(iter(mapping.values()))
+            if isinstance(only_value, dict):
+                return only_value
+        return None
+
+    if isinstance(payload, list):
+        for item in payload:
+            if isinstance(item, dict):
+                return item
+        return {}
+    if isinstance(payload, dict):
+        direct_match = _pick_from_mapping(payload)
+        if direct_match:
+            return direct_match
+        for key in ("project", "projects", "data", "result", "results"):
+            value = payload.get(key)
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        return item
+            if isinstance(value, dict):
+                nested_match = _pick_from_mapping(value)
+                if nested_match:
+                    return nested_match
+                return value
+        return payload
+    return {}
+
+
+def _find_value_by_key(payload: Any, key_tokens: set[str]) -> str | None:
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            normalized_key = _normalize_key(key)
+            if any(token in normalized_key for token in key_tokens):
+                text = _coerce_text_value(value)
+                if text:
+                    return text
+            if isinstance(value, (dict, list)):
+                nested = _find_value_by_key(value, key_tokens)
+                if nested:
+                    return nested
+    elif isinstance(payload, list):
+        for item in payload:
+            nested = _find_value_by_key(item, key_tokens)
+            if nested:
+                return nested
+    return None
+
+
+def _extract_project_api_from_html(html_text: str | None) -> str | None:
+    if not html_text:
+        return None
+    match = re.search(r'project-api="([^"]+)"', html_text, flags=re.IGNORECASE)
+    if match:
+        return html_module.unescape(match.group(1))
+    match = re.search(r"project-api='([^']+)'", html_text, flags=re.IGNORECASE)
+    if match:
+        return html_module.unescape(match.group(1))
+    return None
+
+
+def _project_id_in_payload(payload: Any, project_id: str | None) -> bool:
+    if not project_id or not isinstance(payload, dict):
+        return False
+    normalized = _normalize_text(project_id).upper()
+    if normalized in payload:
+        return True
+    for value in payload.values():
+        if isinstance(value, dict) and normalized in value:
+            return True
+    return False
+
+
+def _detail_matches_project(detail: dict[str, Any], project_id: str | None) -> bool:
+    if not project_id:
+        return bool(detail)
+    expected = _normalize_text(project_id).upper()
+    observed = _normalize_text(str(detail.get("id") or detail.get("projectid") or "")).upper()
+    if observed:
+        return observed == expected
+    return expected in detail
+
+
+@lru_cache(maxsize=4096)
+def _fetch_project_detail(project_id: str | None) -> dict[str, Any]:
+    if not project_id:
+        return {}
+
+    detail_page_url = f"https://projects.worldbank.org/en/projects-operations/project-detail/{project_id}"
+    html_text = None
+    try:
+        html_text = requests.get(detail_page_url, headers={"User-Agent": _USER_AGENT}, timeout=30).text
+    except Exception:
+        html_text = None
+
+    candidate_urls: list[str] = []
+    api_template = _extract_project_api_from_html(html_text)
+    if api_template:
+        api_url = html_module.unescape(api_template)
+        if api_url.startswith("//"):
+            api_url = f"https:{api_url}"
+        if "projectid=" not in api_url.lower() and "id=" not in api_url.lower() and "project_id=" not in api_url.lower():
+            joiner = "&" if "?" in api_url else "?"
+            api_url = f"{api_url}{joiner}id={project_id}"
+        candidate_urls.append(api_url)
+
+    # Also force an explicit ID-filtered v3 endpoint, which is stable for per-project lookup.
+    candidate_urls.append(
+        f"https://search.worldbank.org/api/v3/projects?{urlencode({'format': 'json', 'fl': '*', 'apilang': 'en', 'id': project_id})}"
+    )
+
+    for base_url in (
+        "https://search.worldbank.org/api/v3/projects",
+        "https://search.worldbank.org/api/v2/projects",
+    ):
+        for id_param in ("id", "projectid", "project_id"):
+            params = {
+                "format": "json",
+                "fl": "*",
+                "apilang": "en",
+                id_param: project_id,
+            }
+            candidate_urls.append(f"{base_url}?{urlencode(params)}")
+
+    seen_urls: set[str] = set()
+    for url in candidate_urls:
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+        try:
+            payload = _json_get_with_retry(url)
+        except Exception:
+            continue
+        if not _project_id_in_payload(payload, project_id):
+            continue
+        detail = _unwrap_record_payload(payload, project_id=project_id)
+        if detail and _detail_matches_project(detail, project_id):
+            return detail
+    return {}
+
+
+def _batch_fetch_project_detail_fields(contracts: list[dict[str, Any]]) -> dict[str, tuple[str | None, str | None]]:
+    project_ids = [str(item.get("projectid")).strip() for item in contracts if item.get("projectid")]
+    unique_project_ids = list(dict.fromkeys(project_ids))
+    if not unique_project_ids:
+        return {}
+
+    def _fetch_one(project_id: str) -> tuple[str | None, str | None]:
+        detail = _fetch_project_detail(project_id)
+        return _extract_borrower_country(detail), _extract_implementing_agency(detail)
+
+    project_fields: dict[str, tuple[str | None, str | None]] = {}
+    with ThreadPoolExecutor(max_workers=_PROJECT_DETAIL_WORKERS) as executor:
+        for project_id, fields in zip(unique_project_ids, executor.map(_fetch_one, unique_project_ids)):
+            project_fields[project_id] = fields
+
+    return project_fields
+
+
+def _extract_borrower_country(project_detail: dict[str, Any] | None) -> str | None:
+    if not project_detail:
+        return None
+    specific = _find_value_by_key(project_detail, {"borrowercountry", "projectcountry", "countryshortname", "countryname"})
+    if specific:
+        return specific
+    return _find_value_by_key(project_detail, {"country"})
+
+
+def _extract_implementing_agency(project_detail: dict[str, Any] | None) -> str | None:
+    if not project_detail:
+        return None
+    return _find_value_by_key(project_detail, {"implementingagency", "implementingagencies", "implementingagencyname", "agency"})
 
 
 def _fetch_notice_detail(notice_id: str) -> dict[str, Any]:
@@ -650,8 +857,16 @@ def fetch_world_bank_contracts(
         if not contracts:
             break
 
+        project_fields = _batch_fetch_project_detail_fields(contracts)
+
         for contract in contracts:
-            record = _to_contract_record(contract)
+            project_id = _normalize_text(str(contract.get("projectid") or "")) or None
+            borrower_country, implementing_agency = project_fields.get(project_id, (None, None))
+            record = _to_contract_record(
+                contract,
+                borrower_country=borrower_country,
+                implementing_agency=implementing_agency,
+            )
             if record.record_id and record.record_id in seen_record_ids:
                 continue
             if record.record_id:
@@ -827,10 +1042,19 @@ def _to_record(notice: dict[str, Any]) -> ProcurementRecord:
         contract_url=_build_contract_url(record_id),
     )
 
-
-def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
+def _to_contract_record(
+    contract: dict[str, Any],
+    borrower_country: str | None = None,
+    implementing_agency: str | None = None,
+) -> ProcurementRecord:
     signing_date, year_awarded = _parse_contract_signing_date(contract.get("contr_sgn_date"))
-    contract_country = _extract_contract_country(contract)
+    if borrower_country is None or implementing_agency is None:
+        project_detail = _fetch_project_detail(contract.get("projectid"))
+        if borrower_country is None:
+            borrower_country = _extract_borrower_country(project_detail)
+        if implementing_agency is None:
+            implementing_agency = _extract_implementing_agency(project_detail)
+
     supplier_country = _extract_contract_supplier_country(contract)
     supplier_name = _extract_contract_supplier_name(contract)
     supplier_code = _extract_contract_supplier_code(contract)
@@ -839,7 +1063,7 @@ def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
         project_id=contract.get("projectid"),
         notice_type="Contract",
         notice_no=contract.get("id"),
-        country=contract_country,
+        country=borrower_country,
         year_awarded=year_awarded,
         date_awarded=signing_date,
         data_source="World Bank",
@@ -869,11 +1093,12 @@ def _to_contract_record(contract: dict[str, Any]) -> ProcurementRecord:
         financing_linked_to_bid=None,
         financing_source_chinese=None,
         joint_venture=None,
-        firm_registered_locally=_derive_firm_registered_locally(supplier_country, contract_country),
+        firm_registered_locally=_derive_firm_registered_locally(supplier_country, borrower_country),
         record_id=contract.get("id"),
         awarded_date=signing_date,
         bid_reference_no=contract.get("contr_refnum"),
         project_name=contract.get("project_name"),
+        implementing_agency=implementing_agency,
         contract_url=_build_contract_overview_url(contract.get("id")),
     )
 

@@ -26,7 +26,7 @@ _DEFAULT_YEARS = list(range(2012, 2027))
 _SSL_CONTEXT = ssl._create_unverified_context()
 
 
-@dataclass(slots=True)
+@dataclass
 class CDBContractAward:
     award_year: int | None = None
     notice_id: str | None = None
@@ -289,6 +289,37 @@ def _split_country_and_firm(body: str, country_names: list[str]) -> tuple[str | 
     return None, clean
 
 
+def _extract_country_prefix(body: str, country_names: list[str]) -> tuple[list[str], str | None]:
+    clean = _normalize_text(body)
+    if not clean:
+        return [], None
+
+    remaining = clean
+    countries: list[str] = []
+    separator_pattern = re.compile(r"^[\s\-/:,;&]+")
+
+    while remaining:
+        stripped = separator_pattern.sub("", remaining).strip()
+        if not stripped:
+            remaining = ""
+            break
+
+        lowered = stripped.lower()
+        matched_country: str | None = None
+        for country in country_names:
+            if lowered.startswith(country.lower()):
+                matched_country = country
+                if not countries or countries[-1].lower() != country.lower():
+                    countries.append(country)
+                remaining = stripped[len(country) :]
+                break
+
+        if matched_country is None:
+            break
+
+    return countries, _normalize_text(remaining) or None
+
+
 def _parse_winning_bid(winning_bid_text: str | None, country_names: list[str]) -> tuple[str | None, str | None, str | None, float | None]:
     if not winning_bid_text:
         return None, None, None, None
@@ -297,7 +328,8 @@ def _parse_winning_bid(winning_bid_text: str | None, country_names: list[str]) -
     if not body:
         return None, None, currency, amount
 
-    winning_country, winning_firm = _split_country_and_firm(body, country_names)
+    winning_countries, winning_firm = _extract_country_prefix(body, country_names)
+    winning_country = "; ".join(winning_countries) or None
     return winning_country, winning_firm, currency, amount
 
 

@@ -2,136 +2,154 @@
 
 ## Overview
 
-CapstoneWB is a procurement dataset combining **World Bank** and **Inter-American Development Bank (IDB)** contract records for Latin America and the Caribbean (LAC) with Chinese company participation. The dataset includes **145 verified contracts** and has been cleaned, standardized, and enriched with sector reclassification and firm country information.
+CapstoneWB is a procurement data pipeline that combines three MDB sources:
 
-- **Total Records**: 145 contracts
-- **World Bank**: 60 records (2001-2025)
-- **Inter-American Development Bank**: 85 records (2010-2025)
-- **Last Updated**: May 2026
-- **Coverage**: All historical procurement records available (through May 2026)
+- World Bank (WB)
+- Inter-American Development Bank (IDB)
+- Caribbean Development Bank (CDB)
 
-## Live Site
+The current pipeline produces a merged dataset focused on Latin America and the Caribbean (LAC), with standardized country names and contractor-country metrics for joint-venture analysis.
 
-For a quick view of the dataset without downloading files, open the browser viewer here:
+## Current Status (June 2026)
 
-- [CapstoneWB Data Viewer](https://rubingwang.github.io/CapstoneWB/)
+Latest merged run summary:
 
-## Dataset Structure
+- Total rows: 237,651
+- WB rows: 78,950
+- IDB rows: 158,272
+- CDB rows: 429
+- Output columns: 22
 
-| Field | Description |
-|-------|-------------|
-| `year_awarded` | Award year for filtering and analysis |
-| `date_awarded` | Full award date (YYYY-MM-DD format) |
-| `notice_type` | Contract (standardized to "Contract" for all records) |
-| `notice_id` | Unique contract identifier |
-| `contract_name` | Contract title / procurement description |
-| `project_id` | Funding project identifier |
-| `project_name` | Project name from source metadata |
-| `sector` | Standardized 8-category sector classification |
-| `project_type` | Procurement type (e.g., Works, Goods, Services) |
-| `procurement_channel` | Procurement method label |
-| `data_source` | Source: "World Bank" or "Inter-American Development Bank" |
-| `country` | Project country (standardized format with title case) |
-| `contract_value_usd` | Contract value in USD |
-| `contract_currency` | Normalized to USD |
-| `winning_firm_name` | Awarded contractor name |
-| `winning_firm_name_zh` | Contractor name in Chinese (when available) |
-| `winning_firm_code` | Contractor code/ID from source data |
-| `winning_firm_country` | Contractor country |
-| `winning_firm_is_chinese` | Flag: 1 if Chinese firm, 0 if not |
-| `winning_firm_is_soe` | Flag: 1 if state-owned enterprise (inferred) |
-| `joint_venture` | Flag: 1 if joint venture, 0 if not |
-| `contract_url` | Direct URL to contract record |
-| `record_id` | Internal record identifier |
-| `bid_reference_no` | Bid reference number |
+Primary output files:
 
-## Sector Classification
+- `data/merged_data/worldbank_idb_cdb_merged.csv`
+- `data/merged_data/worldbank_idb_cdb_merged.xlsx`
+- `data/merged_data/worldbank_idb_cdb_merged_0613.csv`
+- `data/merged_data/worldbank_idb_cdb_merged_0613.xlsx`
 
-All 145 records are classified into 8 standardized sectors based on contract name and procurement details:
+## Current Data Construction Logic
 
-- **Infrastructure & Energy**: 76 records (electrification, power transmission, water systems)
-- **Health**: 33 records (vaccines, medical equipment, health programs)
-- **Education**: 10 records (school construction, educational equipment)
-- **Water, Sanitation & Waste**: 10 records
-- **Industry, Trade & Finance**: 10 records
-- **Agriculture**: 2 records
-- **Digital Economy & ICT**: 2 records
-- **Public Admin & Governance**: 2 records
+### 1) WB crawler redesign (contract-level + project-level join)
 
-## Data Quality Notes
+WB extraction now uses contract records as the base (one row per contract), then enriches each contract with project-level metadata.
 
-- **Missing Values**: Represented as "." (single dot placeholder)
-- **Country Names**: Standardized to Title Case with lowercase conjunctions (e.g., "Trinidad and Tobago")
-- **Data Sources**: "Inter-American Development Bank" (standardized from "IDB")
-- **URLs**: All records include valid contract URLs
-  - World Bank: Direct project contract links
-  - IDB: Official IDB procurement dashboard
-- **Contract Names**: IDB records with missing titles fall back to project names
+- Contract endpoint provides contractor fields (for winning firm and winning firm country)
+- Project detail endpoint provides borrower country and implementing agency
+- Project detail fetch is cached and batched by unique project_id to reduce repeated requests
 
-## Project Layout
+Key effect:
 
-- `src/capstonewb/`: Python package (CLI entry point, data models, config)
-- `data/worldbank_idb_merged.csv`: Primary merged dataset (145 records, 24 columns)
-- `data/worldbank_idb_merged.backup.csv`: Synchronized backup copy
-- `data/worldbank_idb_merged.xlsx`: Excel export of merged dataset
-- `docs/data/worldbank_idb_merged.csv`: Copy for web viewer
-- `docs/data/worldbank_idb_merged.xlsx`: Excel copy for web viewer
-- `docs/index.html`: Browser-based data viewer
+- `borrower_country` and `winning_firm_country` are now separated correctly
+- `implementing_agency` is populated from project detail where available
 
-## Setup & Installation
+### 2) Merge logic and standardization
+
+Merge logic in `scripts/merge_worldbank_idb_cdb_compact.py` now includes:
+
+- WB aggregate borrower labels mapped to `Multiple-LAC-Countries`
+  - examples remapped: `Andean Countries`, `Caribbean`, `Central America`, `Latin America and Caribbean`, `OECS Countries`
+- country-name standardization updates (common forms)
+  - examples: `Bahamas, The -> Bahamas`, `Venezuela, Republica Bolivariana de -> Venezuela`, `Turkiye -> Turkey`
+- new contractor-country metrics:
+  - `winning_firm_numbers`
+  - `contractor_country`
+  - `numbers_of_contractor_country`
+  - `if_joint_venture`
+- joint venture classification now follows contractor-country count:
+  - `numbers_of_contractor_country = 1 -> Non-Joint Venture`
+  - `numbers_of_contractor_country > 1 -> Joint Venture`
+
+### 3) Numeric formatting in merged output
+
+The count fields are exported as integer-like values (for example `1`, `2`, `3`) instead of float-like text (`1.0`, `2.0`).
+
+## Merged Schema (Current)
+
+Current merged columns:
+
+1. `year_awarded`
+2. `date_awarded`
+3. `notice_id`
+4. `contract_name`
+5. `project_id`
+6. `project_name`
+7. `sector`
+8. `project_type`
+9. `project_url`
+10. `procurement_channel`
+11. `data_source`
+12. `bid_reference_no`
+13. `country`
+14. `contract_value_usd`
+15. `winning_country`
+16. `winning_firm_numbers`
+17. `contractor_country`
+18. `numbers_of_contractor_country`
+19. `winning_country_type`
+20. `winning_country_group`
+21. `if_joint_venture`
+22. `joint_venture`
+
+## Key Field Definitions
+
+- `winning_country`: normalized winning contractor country cell (semicolon-delimited when multiple)
+- `winning_firm_numbers`: number of winning-firm country entries before country de-duplication
+- `contractor_country`: de-duplicated winning countries joined by semicolon
+- `numbers_of_contractor_country`: number of unique contractor countries in `contractor_country`
+- `if_joint_venture`: JV classification based on `numbers_of_contractor_country`
+- `country`: project/borrower country after normalization; WB aggregate region-like labels are set to `Multiple-LAC-Countries`
+
+## Repository Layout
+
+- `src/capstonewb/`: core package (models, WB crawler, CLI)
+- `scripts/generate_worldbank_raw.py`: build WB raw contract dataset
+- `scripts/merge_worldbank_idb_cdb_compact.py`: merge WB + IDB + CDB into compact schema
+- `data/raw/world_bank/`: WB raw outputs
+- `data/raw/idb/`: IDB raw inputs
+- `data/raw/cdb/`: CDB raw inputs
+- `data/merged_data/`: merged CSV/XLSX outputs
+- `docs/`: browser viewer assets
+
+## Setup
 
 ```bash
-# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install dependencies
 python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
-## Data Access
+## Run Pipeline
 
-### CSV Format
-Primary dataset available in three synchronized copies:
-- `data/worldbank_idb_merged.csv` (main source)
-- `data/worldbank_idb_merged.backup.csv` (backup)
+### 1) Regenerate WB raw contracts
 
-All use UTF-8-sig encoding for Excel compatibility.
+```bash
+python3 scripts/generate_worldbank_raw.py
+```
 
-### Excel Format
-- `data/worldbank_idb_merged.xlsx`
-- `docs/data/worldbank_idb_merged.xlsx` (for web viewer)
+Outputs:
 
-### Web Viewer
-Open `docs/index.html` or visit the GitHub Pages deployment to explore records interactively without downloading files.
+- `data/raw/world_bank/world_bank_lac_raw.csv`
+- `data/raw/world_bank/world_bank_lac_raw.xlsx`
+- `data/raw/world_bank/world_bank_lac_raw.metadata.json`
 
-The web viewer supports:
-- Filtering by year, country, and data source
-- Keyword search across contract names and firm names
-- Pagination and data export
-- Interactive sorting and viewing
+### 2) Merge WB + IDB + CDB
 
-## Data Processing Notes
+```bash
+python3 scripts/merge_worldbank_idb_cdb_compact.py
+```
 
-### Schema Evolution
-This dataset has undergone careful standardization:
-- **Column Count**: 24 fields (removed: contract_amount, durations, financing fields)
-- **Sector Reclassification**: Keywords from contract names analyzed to assign 8-category sectors
-- **Data Source Standardization**: "Inter-American Development Bank" (previously "IDB")
-- **Country Standardization**: Title Case with lowercase conjunctions
-- **Missing Value Handling**: All NULL/empty cells replaced with "." placeholder
+Outputs:
 
-### Data Verification
-- All 145 records verified for accuracy
-- Contract URLs tested for validity
-- Chinese firm names reviewed and standardized
-- Duplicate records merged where applicable
-- Sector classifications validated against procurement descriptions
+- `data/merged_data/worldbank_idb_cdb_merged.csv`
+- `data/merged_data/worldbank_idb_cdb_merged.xlsx`
+- dated versions with `MMDD` suffix
 
-## Version Information
+## Final Version Notes
 
-- **Dataset Version**: May 2026
-- **Record Count**: 145 (60 World Bank + 85 IDB)
-- **Last Verified**: May 12, 2026
-- **Coverage Period**: 2001-2026
+This README documents the current final dataset version and pipeline outputs only.
+
+- WB aggregate borrower labels are normalized to `Multiple-LAC-Countries`
+- Contractor-country metrics are available for JV analysis
+- `if_joint_venture` is derived from `numbers_of_contractor_country`
+- Country naming variants are standardized through mapping rules

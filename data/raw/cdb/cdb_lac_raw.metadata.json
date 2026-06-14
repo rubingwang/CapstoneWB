@@ -4,7 +4,7 @@
   "start_year": 2012,
   "end_year": 2026,
   "total_records": 429,
-  "output_csv": "data/raw/cdb/cdb_lac_raw.csv",
+  "output_csv": "/Users/rubing/VScodeProject/CapstoneWB/data/raw/cdb/cdb_lac_raw.csv",
   "columns": [
     "award_year",
     "notice_id",

@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Iterable
 
 
-@dataclass(slots=True)
+@dataclass
 class ProcurementRecord:
     project_id: str | None = None
     notice_type: str | None = None
@@ -46,6 +46,7 @@ class ProcurementRecord:
     awarded_date: str | None = None
     bid_reference_no: str | None = None
     project_name: str | None = None
+    implementing_agency: str | None = None
     contract_url: str | None = None
 
     def to_dict(self) -> dict[str, Any]:

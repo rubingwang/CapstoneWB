@@ -1,6 +1,7 @@
 {
   "source": "World Bank",
   "region": "Latin America and Caribbean",
+  "source_type": "Contract Overview",
   "start_year": 2015,
   "end_year": 2026,
   "total_records": 78950,
@@ -9,7 +10,7 @@
     "project_id",
     "notice_type",
     "notice_no",
-    "country",
+    "borrower_country",
     "year_awarded",
     "date_awarded",
     "data_source",
@@ -44,6 +45,7 @@
     "awarded_date",
     "bid_reference_no",
     "project_name",
+    "implementing_agency",
     "contract_url"
   ]
 }
