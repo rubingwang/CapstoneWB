@@ -597,22 +597,35 @@ def map_cdb(cdb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame
 
 def write_outputs(dataframe: pd.DataFrame) -> tuple[Path, Path, Path, Path]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    dataframe = dataframe.copy()
+    csv_frame = dataframe.copy()
 
     # Keep count fields as nullable integers so CSV does not end up with 1.0/2.0 formatting.
     for column in ("winning_firm_numbers", "numbers_of_contractor_country"):
-        if column in dataframe.columns:
-            dataframe[column] = pd.to_numeric(dataframe[column], errors="coerce").astype("Int64")
+        if column in csv_frame.columns:
+            csv_frame[column] = pd.to_numeric(csv_frame[column], errors="coerce").astype("Int64")
+
+    # Keep blanks as true empty values for better spreadsheet compatibility.
+    csv_frame = csv_frame.astype(object).where(pd.notna(csv_frame), "")
+
+    # Excel convention: keep numeric columns numeric so spreadsheet aggregation works.
+    excel_frame = csv_frame.copy()
+    for column in ("contract_value_usd", "winning_firm_numbers", "numbers_of_contractor_country"):
+        if column in excel_frame.columns:
+            excel_frame[column] = pd.to_numeric(excel_frame[column], errors="coerce")
+
+    for column in ("winning_firm_numbers", "numbers_of_contractor_country"):
+        if column in excel_frame.columns:
+            excel_frame[column] = excel_frame[column].astype("Int64")
 
     dated_suffix = version_suffix()
     dated_csv = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.csv"
     dated_xlsx = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.xlsx"
     latest_xlsx = OUT_PATH.with_suffix(".xlsx")
 
-    dataframe.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
-    dataframe.to_csv(dated_csv, index=False, encoding="utf-8-sig")
-    dataframe.to_excel(latest_xlsx, index=False)
-    dataframe.to_excel(dated_xlsx, index=False)
+    csv_frame.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
+    csv_frame.to_csv(dated_csv, index=False, encoding="utf-8-sig")
+    excel_frame.to_excel(latest_xlsx, index=False)
+    excel_frame.to_excel(dated_xlsx, index=False)
     return OUT_PATH, latest_xlsx, dated_csv, dated_xlsx
 
 
