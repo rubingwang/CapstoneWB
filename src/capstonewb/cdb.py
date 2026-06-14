@@ -172,30 +172,50 @@ def _parse_anchor(cell_html: str) -> tuple[str | None, str | None, str | None]:
 
 def _parse_amount_and_currency(text: str) -> tuple[str | None, float | None, str | None]:
     clean = _normalize_text(text)
-    amount_match = re.search(r"(?P<amount>\d[\d,]*(?:\.\d+)?)$", clean)
+    if not clean:
+        return None, None, None
+
+    # Normalize malformed separators seen on CDB pages, e.g. "73, 280.00" and "636 .05".
+    clean = re.sub(r"(?<=\d)\s*,\s*(?=\d)", ",", clean)
+    clean = re.sub(r"(?<=\d)\s*\.\s*(?=\d)", ".", clean)
+
+    currency_pattern = (
+        r"(?:USD|US\$|EUR|GBP|CAD|BBD|BDS|BZE|BZD|XCD|JMD|JA\$|TTD|GYD|SRD|BSD|HTG|EC\$|EC|B\$|\$|Euros?|Euro|Dollar(?:s)?)"
+    )
+    amount_pattern = r"\d{1,3}(?:,\d{3})*(?:\.\d+)?|\d+(?:\.\d+)?"
+
+    pair_regex = re.compile(
+        rf"(?P<currency>{currency_pattern})\s*\$?\s*(?P<amount>{amount_pattern})",
+        flags=re.IGNORECASE,
+    )
+    matches = list(pair_regex.finditer(clean))
+
+    if matches:
+        # Use the left-most explicit currency+amount pair; this avoids tail-fragment captures.
+        chosen = matches[0]
+        amount_text = chosen.group("amount")
+        currency = _normalize_text(chosen.group("currency")) or None
+        body = (clean[: chosen.start()] + " " + clean[chosen.end() :]).strip()
+        body = _normalize_text(body)
+        try:
+            amount = float(amount_text.replace(",", ""))
+        except ValueError:
+            amount = None
+        return body or None, amount, currency
+
+    # Fallback: parse trailing amount even if currency is missing.
+    amount_match = re.search(rf"(?P<amount>{amount_pattern})$", clean)
     if not amount_match:
         return clean or None, None, None
 
     amount_text = amount_match.group("amount")
-    prefix = clean[: amount_match.start("amount")].rstrip()
-    currency_match = re.search(
-        r"(?P<currency>(?:USD|EUR|GBP|CAD|BBD|BDS|BZE|XCD|JMD|TTD|GYD|SRD|EC\$|US\$|B\$|\$|Euros?|Euro|Dollar(?:s)?)|[A-Z]{2,5})(?:\s*\$)?\s*$",
-        prefix,
-        flags=re.IGNORECASE,
-    )
-
-    currency: str | None = None
-    body = prefix
-    if currency_match:
-        currency = _normalize_text(currency_match.group("currency")) or None
-        body = prefix[: currency_match.start("currency")].rstrip()
-
+    body = _normalize_text(clean[: amount_match.start("amount")])
     try:
         amount = float(amount_text.replace(",", ""))
     except ValueError:
         amount = None
 
-    return body or None, amount, currency
+    return body or None, amount, None
 
 
 def _normalize_currency_unit(value: str | None) -> str | None:
@@ -204,6 +224,7 @@ def _normalize_currency_unit(value: str | None) -> str | None:
 
     cleaned = _normalize_text(value).upper().replace(".", "")
     cleaned = cleaned.replace("US$", "USD")
+    cleaned = cleaned.replace("JA$", "JMD")
     cleaned = cleaned.replace("EUROS", "EUR").replace("EURO", "EUR")
     cleaned = cleaned.replace("BZE", "BZD")
     cleaned = cleaned.replace("BDS", "BBD")
