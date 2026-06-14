@@ -37,6 +37,13 @@ OUTPUT_COLUMNS = [
 ]
 
 
+NUMERIC_COLUMNS = [
+    "contract_value_usd",
+    "number_of_contractor",
+    "number_of_contractor_country",
+]
+
+
 RENAMES = {
     "country": "borrower country",
     "project_url": "contract_url",
@@ -313,7 +320,16 @@ def write_outputs(frame: pd.DataFrame) -> tuple[Path, Path]:
     xlsx_path = OUTPUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.xlsx"
 
     frame.to_csv(csv_path, index=False, encoding="utf-8-sig")
-    frame.to_excel(xlsx_path, index=False)
+
+    # Keep CSV placeholders as-is, but write true numeric cells to Excel
+    # so users can calculate directly in spreadsheet tools.
+    excel_frame = frame.copy()
+    for col in NUMERIC_COLUMNS:
+        if col in excel_frame.columns:
+            excel_frame[col] = pd.to_numeric(
+                excel_frame[col].replace({".": pd.NA}), errors="coerce"
+            )
+    excel_frame.to_excel(xlsx_path, index=False)
     return csv_path, xlsx_path
 
 
