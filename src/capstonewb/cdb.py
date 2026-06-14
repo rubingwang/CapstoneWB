@@ -270,6 +270,60 @@ def _year_end_usd_rate(year: int, currency_code: str) -> float | None:
     if currency_code == "USD":
         return 1.0
 
+    # Pegged currencies with stable LCU-per-USD definitions.
+    fixed_lcu_per_usd = {
+        "BSD": 1.0,
+        "BZD": 2.0,
+        "BBD": 2.0,
+        "XCD": 2.7,
+    }
+    if currency_code in fixed_lcu_per_usd:
+        return 1.0 / fixed_lcu_per_usd[currency_code]
+
+    # ECB/Frankfurter works well for major currencies.
+    if currency_code in {"EUR", "GBP"}:
+        try:
+            start = f"{year}-01-01"
+            end = f"{year}-12-31"
+            url = f"https://api.frankfurter.app/{start}..{end}?from=USD&to={currency_code}"
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            payload = response.json()
+            rates = payload.get("rates", {})
+            values = [day.get(currency_code) for day in rates.values() if isinstance(day, dict) and day.get(currency_code) is not None]
+            if values:
+                # values are LCU per USD -> convert to USD per LCU
+                lcu_per_usd = float(sum(values) / len(values))
+                if lcu_per_usd != 0:
+                    return 1.0 / lcu_per_usd
+        except Exception:
+            pass
+
+    # World Bank annual average official exchange rate for country-linked currencies.
+    wb_country_by_currency = {
+        "JMD": "JAM",
+        "GYD": "GUY",
+        "HTG": "HTI",
+        "SRD": "SUR",
+        "TTD": "TTO",
+    }
+    iso3 = wb_country_by_currency.get(currency_code)
+    if iso3:
+        try:
+            url = f"https://api.worldbank.org/v2/country/{iso3}/indicator/PA.NUS.FCRF?format=json&per_page=200"
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            payload = response.json()
+            for item in payload[1] or []:
+                if str(item.get("date")) == str(year):
+                    value = item.get("value")
+                    if value is not None:
+                        lcu_per_usd = float(value)
+                        if lcu_per_usd != 0:
+                            return 1.0 / lcu_per_usd
+        except Exception:
+            pass
+
     url = f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@{year}-12-31/v1/currencies/{currency_code.lower()}.json"
     try:
         response = requests.get(url, timeout=30)
