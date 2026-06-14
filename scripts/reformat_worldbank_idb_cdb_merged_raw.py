@@ -307,9 +307,8 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
             frame[column] = None
 
     ordered = frame[OUTPUT_COLUMNS].copy()
-    ordered = ordered.replace({None: "."})
-    ordered = ordered.fillna(".")
-    ordered = ordered.apply(lambda column: column.map(lambda value: "." if isinstance(value, str) and not value.strip() else value))
+    ordered = ordered.astype(object).where(pd.notna(ordered), "")
+    ordered = ordered.apply(lambda column: column.map(lambda value: "" if isinstance(value, str) and not value.strip() else value))
     return ordered
 
 
@@ -321,13 +320,13 @@ def write_outputs(frame: pd.DataFrame) -> tuple[Path, Path]:
 
     frame.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
-    # Keep CSV placeholders as-is, but write true numeric cells to Excel
+    # Keep blanks in CSV, but write true numeric cells to Excel
     # so users can calculate directly in spreadsheet tools.
     excel_frame = frame.copy()
     for col in NUMERIC_COLUMNS:
         if col in excel_frame.columns:
             excel_frame[col] = pd.to_numeric(
-                excel_frame[col].replace({".": pd.NA}), errors="coerce"
+                excel_frame[col], errors="coerce"
             )
     excel_frame.to_excel(xlsx_path, index=False)
     return csv_path, xlsx_path
