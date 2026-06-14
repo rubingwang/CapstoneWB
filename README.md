@@ -49,13 +49,19 @@ python -m pip install -e .
 python3 scripts/generate_worldbank_raw.py
 ```
 
-### 3) Merge WB + IDB + CDB into raw merged table
+### 3) Regenerate CDB raw data (includes parser/FX validation)
+
+```bash
+python3 scripts/generate_cdb_raw.py
+```
+
+### 4) Merge WB + IDB + CDB into raw merged table
 
 ```bash
 python3 scripts/merge_worldbank_idb_cdb_compact.py
 ```
 
-### 4) Build finalized dated output
+### 5) Build finalized dated output
 
 ```bash
 python3 scripts/reformat_worldbank_idb_cdb_merged_raw.py
@@ -98,8 +104,11 @@ The finalized 0614 file contains the following columns:
 ## Country Standardization (Current 0614)
 
 - Borrower-country names are standardized to consistent labels in the finalized output.
+- Regional borrower placeholders are normalized as `99-multiple-lac-country`.
+- `World` / `Stateless` placeholders are normalized as `99-international-organization`.
 - Common abbreviated country names are normalized to full forms (for example, `St. Lucia` -> `Saint Lucia`).
 - `St Maarten` is standardized as `Sint Maarten`.
+- `Hong Kong` is standardized as `Hong Kong SAR, China`.
 - Contractor-country values are standardized to a consistent country-name format for cross-source analysis.
 
 ## Sector Taxonomy

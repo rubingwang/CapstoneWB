@@ -13,6 +13,8 @@ import json
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_DIR = ROOT / "src"
@@ -51,6 +53,19 @@ def main() -> None:
         raise SystemExit("No CDB records were returned.")
 
     save_records(records, str(output_path))
+
+    # Guardrail: if currency is parsed but USD is still missing, stop the pipeline.
+    df = pd.read_csv(output_path, dtype=str, keep_default_na=False)
+    currency = df.get("currency_unit", pd.Series([""] * len(df))).astype(str).str.strip()
+    usd = df.get("contract_value_usd", pd.Series([""] * len(df))).astype(str).str.strip()
+    missing_usd = usd.eq("") | usd.eq(".") | usd.str.lower().eq("nan")
+    has_currency = currency.ne("")
+    unresolved = int((missing_usd & has_currency).sum())
+    if unresolved > 0:
+        raise SystemExit(
+            f"CDB raw validation failed: {unresolved} rows have currency_unit but missing contract_value_usd. "
+            "Regenerate after fixing parser/FX mapping before merging."
+        )
 
     dataframe_columns = list(records[0].to_dict().keys())
     summary = {

@@ -110,7 +110,8 @@ REGION_COUNTRY_LABELS = {
     "ALBA",
 }
 
-MULTI_LAC_LABEL = "Multiple-LAC-Countries"
+MULTI_LAC_LABEL = "99-multiple-lac-country"
+INTERNATIONAL_ORG_LABEL = "99-international-organization"
 
 
 def load_csv(path: Path) -> pd.DataFrame:
@@ -260,10 +261,12 @@ def normalize_country_name(value: str | None) -> str | None:
         # Panama Canal Zone -> not a country
         "panama canal zone": None,
         "panama canal zo": None,
-        # Stateless -> no country
-        "stateless": None,
-        # World -> not a country
-        "world": None,
+        # Stateless/World should be captured as International Organization
+        "stateless": INTERNATIONAL_ORG_LABEL,
+        "world": INTERNATIONAL_ORG_LABEL,
+        "international organization": INTERNATIONAL_ORG_LABEL,
+        # Harmonize legacy regional placeholder label
+        "multiple-lac-countries": MULTI_LAC_LABEL,
         # Curacao standardization
         "curacao": "Curacao",
         # French Guiana
@@ -278,10 +281,43 @@ def normalize_country_name(value: str | None) -> str | None:
         "venezuela, republica bolivariana de": "Venezuela",
         "turkiye": "Turkey",
         "slovak republic": "Slovakia",
-        "hong kong sar, china": "Hong Kong",
+        "hong kong": "Hong Kong SAR, China",
+        "hong kong sar, china": "Hong Kong SAR, China",
         "taiwan, china": "Taiwan",
     }
     return post_fixes.get(normalized.lower(), normalized)
+
+
+def _split_country_values(value: str | None) -> list[str]:
+    if value in (None, ""):
+        return []
+    return [part.strip() for part in str(value).split(";") if part and part.strip()]
+
+
+def validate_merged_labels(dataframe: pd.DataFrame) -> None:
+    check_columns = ["country", "winning_country", "contractor_country"]
+    violations: list[str] = []
+    for column in check_columns:
+        if column not in dataframe.columns:
+            continue
+
+        series = dataframe[column].fillna("").astype(str)
+        bad_multi_lac = series.str.contains("Multiple-LAC-Countries", case=False, regex=False)
+        bad_int_org = series.str.contains("International Organization", case=False, regex=False)
+        if bad_multi_lac.any():
+            violations.append(f"{column}: contains legacy label 'Multiple-LAC-Countries'")
+        if bad_int_org.any():
+            violations.append(f"{column}: contains legacy label 'International Organization'")
+
+        for value in series[series.str.strip() != ""]:
+            tokens = _split_country_values(value)
+            if any(token in {"World", "Stateless", "world", "stateless"} for token in tokens):
+                violations.append(f"{column}: contains raw world/stateless token")
+                break
+
+    if violations:
+        detail = "\n".join(sorted(set(violations)))
+        raise SystemExit(f"Merged label validation failed:\n{detail}")
 
 
 def normalize_borrower_country(value: str | None) -> str | None:
@@ -591,6 +627,8 @@ def main() -> None:
         ignore_index=True,
         sort=False,
     ).reindex(columns=selected_columns())
+
+    validate_merged_labels(merged)
 
     latest_csv, latest_xlsx, dated_csv, dated_xlsx = write_outputs(merged)
 
