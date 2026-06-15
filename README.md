@@ -2,61 +2,63 @@
 
 ## Overview
 
-CapstoneWB 是一个面向拉丁美洲和加勒比地区（LAC）的采购合同数据流水线项目，当前整合三个多边开发银行数据源：World Bank、IDB、CDB。项目目标是提供可复现的数据生成、标准化、合并与导出流程，用于后续统计分析与论文研究。
+CapstoneWB is a procurement contract data pipeline for Latin America and the Caribbean (LAC).
+It currently integrates three multilateral development bank sources: World Bank, IDB, and CDB.
+The project goal is to provide a reproducible workflow for data generation, standardization, merge, and export for downstream analysis and thesis work.
 
-当前统计基于 `data/merged_data/worldbank_idb_cdb_merged_0615.csv`。
+The statistics below are based on `data/merged_data/worldbank_idb_cdb_merged_0615.csv`.
 
-基础范围统计：
+Baseline coverage:
 
-- 起始日期：`2000-07-01`
-- 截止日期：`2026-06-09`
-- 合同总数：`237,651`
+- Start date: `2000-07-01`
+- End date: `2026-06-09`
+- Total contracts: `237,651`
 
-分数据源统计：
+Per data source:
 
 - World Bank
-	- 合同数：`78,950`
-	- 借贷国家数（`borrower country` 去重）：`33`
-	- 合同累计金额（USD）：`41,392,362,556.55`
+  - Contracts: `78,950`
+  - Borrower countries (`borrower country`, distinct): `33`
+  - Cumulative contract value (USD): `41,392,362,556.55`
 - IDB
-	- 合同数：`158,272`
-	- 借贷国家数（`borrower country` 去重）：`27`
-	- 合同累计金额（USD）：`59,490,595,185.55`
+  - Contracts: `158,272`
+  - Borrower countries (`borrower country`, distinct): `27`
+  - Cumulative contract value (USD): `59,490,595,185.55`
 - CDB
-	- 合同数：`429`
-	- 借贷国家数（`borrower country` 去重）：`20`
-	- 合同累计金额（USD）：`1,154,888,051.84`
+  - Contracts: `429`
+  - Borrower countries (`borrower country`, distinct): `20`
+  - Cumulative contract value (USD): `1,154,888,051.84`
 
-Grand Total（全样本合计）：
+Grand total:
 
-- 合同总数：`237,651`
-- 借贷国家数（`borrower country` 去重）：`39`
-- 合同累计金额（USD）：`102,037,845,793.94`
+- Total contracts: `237,651`
+- Borrower countries (`borrower country`, distinct): `39`
+- Cumulative contract value (USD): `102,037,845,793.94`
 
 ## Key definition
 
-以下为当前最终数据（0615）字段定义：
+Field definitions for the current finalized dataset (0615):
 
-1. `year_awarded`：合同授予年份。
-2. `date_awarded`：合同授予日期（通常为 YYYY-MM-DD）。
-3. `borrower country`：借贷国/项目实施国。
-4. `notice_id`：采购公告或合同记录编号。
-5. `contract_name`：合同名称（采购包名称）。
-6. `contract_url`：合同或项目采购记录链接。
-7. `project_id`：项目编号。
-8. `project_name`：项目名称。
-9. `project_type`：采购类别（如货物、工程、咨询等）。
-10. `project_sector`：项目所属部门（归并后的标准部门）。
-11. `procurement_channel`：采购渠道。
-12. `data_source`：数据来源机构（World Bank / IDB / CDB）。
-13. `contract_value_usd`：合同金额（美元）。
-14. `number_of_contractor`：中标方数量。
-15. `contractor_country`：原始中标方国家字段（可能为多值）。
-16. `contractor_country_unique`：中标方国家唯一值字段。规则：默认取第一个国家；若包含 `Hong Kong SAR, China` 则取该值；否则若包含 `China/中国` 则取 `China`。
-17. `number_of_contractor_country`：中标方国家数量。
-18. `contractor_country_type`：中标方国家类型分组。
-19. `contractor_country_group`：中标方国家集团分组（如 G7/BRICS/Others）。
-20. `if_joint_venture`：是否联合体（Joint Venture）标记。
+1. `year_awarded`: Contract award year.
+2. `date_awarded`: Contract award date (typically YYYY-MM-DD).
+3. `borrower country`: Borrowing country / project implementation country.
+4. `notice_id`: Procurement notice or contract record identifier.
+5. `contract_name`: Contract title (procurement package title).
+6. `contract_url`: Link to the contract or project procurement record.
+7. `project_id`: Project identifier.
+8. `project_name`: Project title.
+9. `project_type`: Procurement category (for example, goods, works, consulting).
+10. `project_sector`: Project sector (mapped into standardized sector groups).
+11. `procurement_channel`: Procurement channel.
+12. `data_source`: Source institution (World Bank / IDB / CDB).
+13. `contract_value_usd`: Contract amount in USD.
+14. `number_of_contractor`: Number of awarded contractors.
+15. `contractor_country`: Original contractor-country field (can be multi-valued).
+16. `contractor_country_unique`: Unique contractor-country field. Rule: default to the first country; if `Hong Kong SAR, China` appears, use it; otherwise, if `China/中国` appears, use `China`.
+17. `number_of_contractor_country`: Number of contractor countries.
+18. `contractor_country_type`: Contractor-country type grouping.
+19. `contractor_country_group`: Contractor-country bloc grouping (for example, G7/BRICS/Others).
+20. `if_joint_venture`: Joint-venture flag.
 
 ## Pipeline
 
