@@ -79,7 +79,7 @@ G7_COUNTRIES = {
     "United States",
 }
 
-BRICKES_COUNTRIES = {
+BRICS_COUNTRIES = {
     "Brazil",
     "China",
     "India",
@@ -429,8 +429,8 @@ def country_group(value: str | None) -> str | None:
         return None
     if any(country in G7_COUNTRIES for country in normalized):
         return "G7"
-    if any(country in BRICKES_COUNTRIES for country in normalized):
-        return "BRICKES"
+    if any(country in BRICS_COUNTRIES for country in normalized):
+        return "BRICS"
     return "Others"
 
 
@@ -621,11 +621,16 @@ def write_outputs(dataframe: pd.DataFrame) -> tuple[Path, Path, Path, Path]:
     dated_csv = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.csv"
     dated_xlsx = OUT_DIR / f"worldbank_idb_cdb_merged_{dated_suffix}.xlsx"
     latest_xlsx = OUT_PATH.with_suffix(".xlsx")
+    raw_csv = OUT_DIR / "worldbank_idb_cdb_merged_raw.csv"
+    raw_xlsx = OUT_DIR / "worldbank_idb_cdb_merged_raw.xlsx"
 
+    # Output merged data (compact/raw 22-column format)
     csv_frame.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
     csv_frame.to_csv(dated_csv, index=False, encoding="utf-8-sig")
+    csv_frame.to_csv(raw_csv, index=False, encoding="utf-8-sig")
     excel_frame.to_excel(latest_xlsx, index=False)
     excel_frame.to_excel(dated_xlsx, index=False)
+    excel_frame.to_excel(raw_xlsx, index=False)
     return OUT_PATH, latest_xlsx, dated_csv, dated_xlsx
 
 

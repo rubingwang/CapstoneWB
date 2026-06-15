@@ -30,6 +30,7 @@ OUTPUT_COLUMNS = [
     "contract_value_usd",
     "number_of_contractor",
     "contractor_country",
+    "contractor_country_unique",
     "number_of_contractor_country",
     "contractor_country_type",
     "contractor_country_group",
@@ -274,6 +275,27 @@ def classify_sector_from_source_sector(source_sector: str | None) -> str | None:
     return "Public Administration and Governance"
 
 
+def contractor_country_unique(value: str | None) -> str | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+
+    parts = [segment.strip() for segment in text.replace("|", ";").split(";") if segment and segment.strip()]
+    if not parts:
+        return None
+
+    # Keep Hong Kong labels separate from mainland China.
+    for part in parts:
+        normalized = part.lower().replace(" ", "")
+        if "hongkong" in normalized and "china" in normalized:
+            return "Hong Kong SAR, China"
+
+    # If any listed country contains China information, force the unified value to China.
+    if any("china" in part.lower() or "中国" in part for part in parts):
+        return "China"
+    return parts[0]
+
+
 def transform(df: pd.DataFrame) -> pd.DataFrame:
     frame = df.copy()
     raw_sector = frame.get("sector")
@@ -300,6 +322,7 @@ def transform(df: pd.DataFrame) -> pd.DataFrame:
         project_sector_values.append(classified)
 
     frame["project_sector"] = project_sector_values
+    frame["contractor_country_unique"] = frame.get("contractor_country", pd.Series([None] * len(frame))).map(contractor_country_unique)
 
     # Keep the base file intact and generate a new analysis-friendly version.
     for column in OUTPUT_COLUMNS:
