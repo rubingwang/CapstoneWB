@@ -113,6 +113,40 @@ REGION_COUNTRY_LABELS = {
 MULTI_LAC_LABEL = "99-multiple-lac-country"
 INTERNATIONAL_ORG_LABEL = "99-international-organization"
 
+# Core LAC countries (standardized names after normalize_country_name())
+LAC_COUNTRIES = {
+    "Argentina",
+    "Belize",
+    "Bolivia",
+    "Brazil",
+    "Chile",
+    "Colombia",
+    "Costa Rica",
+    "Dominica",
+    "Dominican Republic",
+    "Ecuador",
+    "El Salvador",
+    "Grenada",
+    "Guatemala",
+    "Guyana",
+    "Haiti",
+    "Honduras",
+    "Jamaica",
+    "Mexico",
+    "Nicaragua",
+    "Panama",
+    "Paraguay",
+    "Peru",
+    "Suriname",
+    "Trinidad and Tobago",
+    "Uruguay",
+    "Venezuela",
+    # Alternative/extended LAC region entries
+    "St. Kitts and Nevis",
+    "St. Lucia",
+    "St. Vincent and the Grenadines",
+}
+
 
 def load_csv(path: Path) -> pd.DataFrame:
     dataframe = pd.read_csv(path, dtype=str)
@@ -323,8 +357,13 @@ def validate_merged_labels(dataframe: pd.DataFrame) -> None:
 def normalize_borrower_country(value: str | None) -> str | None:
     normalized = normalize_country_name(value)
     if not normalized:
-        return None
+        return MULTI_LAC_LABEL  # Map NaN/blank to 99-multiple-lac-country
     if normalized in REGION_COUNTRY_LABELS:
+        return MULTI_LAC_LABEL
+    if normalized in (MULTI_LAC_LABEL, INTERNATIONAL_ORG_LABEL):
+        return normalized  # Pass through 99- labels
+    # If not in LAC whitelist, map to 99-multiple-lac-country
+    if normalized not in LAC_COUNTRIES:
         return MULTI_LAC_LABEL
     return normalized
 
