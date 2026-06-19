@@ -26,6 +26,7 @@ OUTPUT_COLUMNS = [
     "project_type",
     "project_sector",
     "procurement_channel",
+    "procurement_method",
     "data_source",
     "contract_value_usd",
     "number_of_contractor",

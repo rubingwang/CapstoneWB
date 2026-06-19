@@ -110,12 +110,15 @@ REGION_COUNTRY_LABELS = {
     "ALBA",
 }
 
-MULTI_LAC_LABEL = "99-multiple-lac-country"
+MULTI_LAC_LABEL = "Regional Countries"
 INTERNATIONAL_ORG_LABEL = "99-international-organization"
 
 # Core LAC countries (standardized names after normalize_country_name())
 LAC_COUNTRIES = {
     "Argentina",
+    "Antigua and Barbuda",
+    "Bahamas",
+    "Barbados",
     "Belize",
     "Bolivia",
     "Brazil",
@@ -142,9 +145,10 @@ LAC_COUNTRIES = {
     "Uruguay",
     "Venezuela",
     # Alternative/extended LAC region entries
-    "St. Kitts and Nevis",
-    "St. Lucia",
-    "St. Vincent and the Grenadines",
+    "Saint Kitts and Nevis",
+    "Saint Lucia",
+    "Saint Vincent and the Grenadines",
+    "Sint Maarten",
 }
 
 
@@ -268,6 +272,7 @@ def normalize_country_name(value: str | None) -> str | None:
         "united states of america": "United States",
         "people's republic of china": "China",
         "st. maarten (dutch part)": "St Maarten",
+        "st. maarten": "St Maarten",
         "sint maarten (dutch part)": "St Maarten",
         "sint maarten": "St Maarten",
         # Saint -> St standardization
@@ -357,12 +362,24 @@ def validate_merged_labels(dataframe: pd.DataFrame) -> None:
 def normalize_borrower_country(value: str | None) -> str | None:
     normalized = normalize_country_name(value)
     if not normalized:
-        return MULTI_LAC_LABEL  # Map NaN/blank to 99-multiple-lac-country
+        return MULTI_LAC_LABEL  # Map NaN/blank/non-LAC to Regional Countries
     if normalized in REGION_COUNTRY_LABELS:
         return MULTI_LAC_LABEL
+
+    # Borrower-country output labels are constrained to a single canonical list.
+    borrower_aliases = {
+        "St. Kitts and Nevis": "Saint Kitts and Nevis",
+        "St. Lucia": "Saint Lucia",
+        "St. Vincent and the Grenadines": "Saint Vincent and the Grenadines",
+        "St Maarten": "Sint Maarten",
+        "St. Maarten": "Sint Maarten",
+    }
+    normalized = borrower_aliases.get(normalized, normalized)
+
     if normalized in (MULTI_LAC_LABEL, INTERNATIONAL_ORG_LABEL):
-        return normalized  # Pass through 99- labels
-    # If not in LAC whitelist, map to 99-multiple-lac-country
+        return MULTI_LAC_LABEL
+
+    # If not in LAC whitelist, map to Regional Countries
     if normalized not in LAC_COUNTRIES:
         return MULTI_LAC_LABEL
     return normalized
@@ -497,6 +514,7 @@ def selected_columns() -> list[str]:
         "project_type",
         "project_url",
         "procurement_channel",
+        "procurement_method",
         "data_source",
         "bid_reference_no",
         "country",
@@ -536,6 +554,7 @@ def map_world_bank(wb_df: pd.DataFrame, country_candidates: list[str]) -> pd.Dat
                 "project_type": row.get("project_type"),
                 "project_url": row.get("contract_url"),
                 "procurement_channel": row.get("procurement_channel"),
+                "procurement_method": row.get("procurement_method"),
                 "data_source": row.get("data_source") or "World Bank",
                 "bid_reference_no": row.get("bid_reference_no"),
                 "country": project_country,
@@ -576,6 +595,7 @@ def map_idb(idb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame
                 "project_type": row.get("operation_type_name"),
                 "project_url": None,
                 "procurement_channel": row.get("procurement_type"),
+                "procurement_method": row.get("procurement_type"),
                 "data_source": "IDB",
                 "bid_reference_no": None,
                 "country": project_country,
@@ -617,6 +637,7 @@ def map_cdb(cdb_df: pd.DataFrame, country_candidates: list[str]) -> pd.DataFrame
                 "project_type": row.get("procurement_type"),
                 "project_url": row.get("notice_url"),
                 "procurement_channel": row.get("procurement_type"),
+                "procurement_method": None,
                 "data_source": "CDB",
                 "bid_reference_no": None,
                 "country": project_country,
